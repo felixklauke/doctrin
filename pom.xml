@@ -12,6 +12,7 @@
         <module>server</module>
         <module>commons</module>
         <module>client</module>
+        <module>client-rx</module>
     </modules>
 
 
