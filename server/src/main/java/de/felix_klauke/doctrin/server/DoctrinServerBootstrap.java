@@ -11,6 +11,11 @@ import de.felix_klauke.doctrin.server.module.DoctrinServerModule;
  */
 public class DoctrinServerBootstrap {
 
+    /**
+     * The entry method of the JVM.
+     *
+     * @param args The cli arguments.
+     */
     public static void main(String[] args) {
         Injector injector = Guice.createInjector(new DoctrinServerModule());
         DoctrinServerApplication application = injector.getInstance(DoctrinServerApplication.class);

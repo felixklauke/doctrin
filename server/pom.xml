@@ -44,6 +44,15 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
