@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/FelixKlauke/doctrin.svg?branch=dev)](https://travis-ci.org/FelixKlauke/doctrin)
+[![codecov](https://codecov.io/gh/FelixKlauke/doctrin/branch/dev/graph/badge.svg)](https://codecov.io/gh/FelixKlauke/doctrin)
 
 # Doctrin
 
