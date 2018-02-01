@@ -12,6 +12,10 @@ import de.felix_klauke.doctrin.server.module.DoctrinServerModule;
  */
 public class DoctrinServerBootstrap {
 
+    public DoctrinServerBootstrap() {
+        throw new AssertionError("This bootstrap should never be initialized.");
+    }
+
     /**
      * The entry method of the JVM.
      *

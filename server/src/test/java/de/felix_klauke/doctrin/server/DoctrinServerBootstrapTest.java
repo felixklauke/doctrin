@@ -1,7 +1,5 @@
 package de.felix_klauke.doctrin.server;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -9,16 +7,13 @@ import org.junit.Test;
  */
 public class DoctrinServerBootstrapTest {
 
-    @Before
-    public void setUp() {
+    @Test(expected = AssertionError.class)
+    public void testCreation() throws AssertionError {
+        new DoctrinServerBootstrap();
     }
 
     @Test
     public void main() {
         DoctrinServerBootstrap.main(new String[]{});
-    }
-
-    @After
-    public void tearDown() {
     }
 }
