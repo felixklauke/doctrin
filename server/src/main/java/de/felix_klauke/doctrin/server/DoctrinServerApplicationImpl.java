@@ -10,6 +10,15 @@ import org.slf4j.LoggerFactory;
  * IO or other intensive operations and should delegate as many tasks as possible to prevent failures and lags
  * in the application itself as we aim to interact on a real time level.
  *
+ * The main server application has the following main tasks:
+ *
+ * <ul>
+ *     <li>Monitoring and controlling the netty server</li>
+ *     <li>Handling network wide cluster events</li>
+ *     <li>Collecting and reporting metrics</li>
+ *     <li>Launching some other services</li>
+ * </ul>
+ *
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
