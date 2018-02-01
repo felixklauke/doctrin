@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Test for {@link DoctrinCommons}.
+ *
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinCommonsTest {

@@ -6,6 +6,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Test for the {@link DoctrinServerConfig}.
+ *
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinServerConfigTest {

@@ -3,6 +3,8 @@ package de.felix_klauke.doctrin.server;
 import org.junit.Test;
 
 /**
+ * Test for {@link DoctrinServerBootstrap}.
+ *
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinServerBootstrapTest {
