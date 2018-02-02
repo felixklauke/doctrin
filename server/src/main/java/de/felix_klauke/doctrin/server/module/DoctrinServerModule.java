@@ -4,6 +4,8 @@ import com.google.inject.AbstractModule;
 import de.felix_klauke.doctrin.server.DoctrinServerApplication;
 import de.felix_klauke.doctrin.server.DoctrinServerApplicationImpl;
 import de.felix_klauke.doctrin.server.config.DoctrinServerConfig;
+import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
+import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 
 /**
  * The module to define or google guice dependencies.
@@ -33,5 +35,8 @@ public class DoctrinServerModule extends AbstractModule {
 
         // Application
         bind(DoctrinServerApplication.class).to(DoctrinServerApplicationImpl.class).asEagerSingleton();
+
+        // Connection
+        bind(DoctrinServerConnection.class).to(DoctrinNettyServerConnection.class);
     }
 }
