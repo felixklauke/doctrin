@@ -19,7 +19,7 @@ public class DoctrinServerConfigTest {
 
     @Before
     public void setUp() {
-        doctrinServerConfig = new DoctrinServerConfig(TEST_HOST, TEST_PORT);
+        doctrinServerConfig = new DoctrinServerConfig(TEST_HOST, TEST_PORT, 1, 4);
     }
 
     @Test
