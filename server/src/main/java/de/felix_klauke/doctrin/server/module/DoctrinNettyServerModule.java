@@ -5,7 +5,6 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
-import de.felix_klauke.doctrin.server.channel.DoctrinServerChannelFactory;
 import de.felix_klauke.doctrin.server.channel.DoctrinServerChannelInitializer;
 import de.felix_klauke.doctrin.server.config.DoctrinServerConfig;
 import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
@@ -13,13 +12,14 @@ import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnectionFactory;
 import de.felix_klauke.doctrin.server.network.DoctrinNettyServer;
 import de.felix_klauke.doctrin.server.network.DoctrinServer;
-import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
  * @author Felix Klauke <fklauke@itemis.de>
@@ -34,10 +34,6 @@ public class DoctrinNettyServerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        // ChannelFactory
-        bind(new TypeLiteral<ChannelFactory<ServerChannel>>() {
-        }).to(DoctrinServerChannelFactory.class);
-
         // ChannelInitializer
         bind(new TypeLiteral<ChannelInitializer<ServerChannel>>() {
         }).to(DoctrinServerChannelInitializer.class).asEagerSingleton();
@@ -63,5 +59,10 @@ public class DoctrinNettyServerModule extends AbstractModule {
     private EventLoopGroup providesWorkerGroup() {
         int workerGroupSize = doctrinServerConfig.getWorkerGroupSize();
         return Epoll.isAvailable() ? new EpollEventLoopGroup(workerGroupSize) : new NioEventLoopGroup(workerGroupSize);
+    }
+
+    @Provides
+    private Class<? extends ServerChannel> providesServerChannelClass() {
+        return Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
     }
 }
