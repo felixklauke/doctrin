@@ -42,18 +42,10 @@
     </build>
 
     <dependencies>
-        <!-- Google Guice Dependency Injection -->
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>4.1.0</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- Commons module -->
         <dependency>
             <groupId>de.felix_klauke</groupId>
-            <artifactId>doctrin-commons</artifactId>
+            <artifactId>doctrin-core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
@@ -64,30 +56,6 @@
             <artifactId>junit</artifactId>
             <version>4.0</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- Logging -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- RxJava -->
-        <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>2.1.9</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Assisted Injection -->
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-assistedinject</artifactId>
-            <version>4.1.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

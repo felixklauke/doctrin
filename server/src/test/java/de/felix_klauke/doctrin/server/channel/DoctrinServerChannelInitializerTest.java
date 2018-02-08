@@ -16,7 +16,7 @@ public class DoctrinServerChannelInitializerTest {
 
     @Before
     public void setUp() {
-        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new);
+        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, serverApplication);
     }
 
     @Test

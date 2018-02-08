@@ -1,7 +1,11 @@
 package de.felix_klauke.doctrin.server;
 
+import de.felix_klauke.doctrin.core.DoctrinCoreApplication;
+import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 
 /**
  * The default implementation of the {@link DoctrinServerApplication}. It implements how the server behaves on
@@ -19,6 +23,8 @@ import org.slf4j.LoggerFactory;
  *     <li>Launching some other services</li>
  * </ul>
  *
+ * The server application is responsible for the communication with the core.
+ *
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
@@ -29,10 +35,25 @@ public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
      */
     private final Logger logger = LoggerFactory.getLogger(DoctrinServerApplicationImpl.class);
 
+    /**
+     * The core application that will handle everything.
+     */
+    private final DoctrinCoreApplication coreApplication;
+
+    @Inject
+    public DoctrinServerApplicationImpl(DoctrinCoreApplication coreApplication) {
+        this.coreApplication = coreApplication;
+    }
+
     @Override
     public void initialize() {
         logger.info("Initializing doctrin server application.");
 
         logger.info("Initialized doctrin server application.");
+    }
+
+    @Override
+    public void handleNewConnection(DoctrinServerConnection connection) {
+        logger.info("New Connection was established.");
     }
 }

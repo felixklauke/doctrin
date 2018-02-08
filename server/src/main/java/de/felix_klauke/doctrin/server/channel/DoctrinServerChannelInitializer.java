@@ -2,6 +2,8 @@ package de.felix_klauke.doctrin.server.channel;
 
 import de.felix_klauke.doctrin.commons.codec.JsonDecoder;
 import de.felix_klauke.doctrin.commons.codec.JsonEncoder;
+import de.felix_klauke.doctrin.server.DoctrinServerApplication;
+import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnectionFactory;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -22,11 +24,17 @@ public class DoctrinServerChannelInitializer extends ChannelInitializer<ServerCh
     /**
      * The server connection factory.
      */
-    private DoctrinServerConnectionFactory serverConnectionFactory;
+    private final DoctrinServerConnectionFactory serverConnectionFactory;
+
+    /**
+     * The instance of the server application.
+     */
+    private final DoctrinServerApplication serverApplication;
 
     @Inject
-    public DoctrinServerChannelInitializer(DoctrinServerConnectionFactory serverConnectionFactory) {
+    public DoctrinServerChannelInitializer(DoctrinServerConnectionFactory serverConnectionFactory, DoctrinServerApplication serverApplication) {
         this.serverConnectionFactory = serverConnectionFactory;
+        this.serverApplication = serverApplication;
     }
 
     @Override
@@ -37,6 +45,14 @@ public class DoctrinServerChannelInitializer extends ChannelInitializer<ServerCh
         channelPipeline.addLast(new LengthFieldPrepender(4));
         channelPipeline.addLast(new JsonEncoder());
         channelPipeline.addLast(new LoggingHandler(LogLevel.DEBUG));
-        channelPipeline.addLast((ChannelHandler) serverConnectionFactory.createConnection());
+
+        DoctrinServerConnection connection = serverConnectionFactory.createConnection();
+        if (!(connection instanceof ChannelHandler)) {
+            throw new IllegalStateException("Connection has to be a channel handler if working with netty.");
+        }
+
+        channelPipeline.addLast((ChannelHandler) connection);
+
+        serverApplication.handleNewConnection(connection);
     }
 }

@@ -20,7 +20,7 @@ public class DoctrinNettyServerTest {
     public void setUp() {
         doctrinServer = new DoctrinNettyServer("localhost", 9999, new NioEventLoopGroup(1),
                 new NioEventLoopGroup(4), new ServerBootstrapProvider(NioServerSocketChannel.class,
-                new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new)));
+                new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, serverApplication)));
     }
 
     @Test

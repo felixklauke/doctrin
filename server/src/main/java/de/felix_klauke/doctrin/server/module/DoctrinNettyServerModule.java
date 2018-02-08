@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Named;
+import de.felix_klauke.doctrin.core.module.DoctrinCoreModule;
 import de.felix_klauke.doctrin.server.channel.DoctrinServerChannelInitializer;
 import de.felix_klauke.doctrin.server.config.DoctrinServerConfig;
 import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
@@ -45,6 +46,9 @@ public class DoctrinNettyServerModule extends AbstractModule {
 
         // Server
         bind(DoctrinServer.class).to(DoctrinNettyServer.class).asEagerSingleton();
+
+        // Core
+        install(new DoctrinCoreModule());
     }
 
     @Provides
