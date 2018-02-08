@@ -40,6 +40,6 @@ public class DoctrinNettyServerConnectionTest {
         doctrinNettyServerConnection.setRemoteName("test-01");
 
         assertNotNull(doctrinNettyServerConnection.getRemoteName());
-        assertEquals("test-01", doctrinNettyServerConnection.getRemoteName());
+        assertEquals("test-01", doctrinNettyServerConnection.getRemoteName().blockingFirst());
     }
 }
