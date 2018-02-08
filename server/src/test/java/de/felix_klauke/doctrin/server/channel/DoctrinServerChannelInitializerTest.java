@@ -1,5 +1,7 @@
 package de.felix_klauke.doctrin.server.channel;
 
+import de.felix_klauke.doctrin.core.DoctrinCoreApplicationImpl;
+import de.felix_klauke.doctrin.server.DoctrinServerApplicationImpl;
 import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.junit.Before;
@@ -16,7 +18,7 @@ public class DoctrinServerChannelInitializerTest {
 
     @Before
     public void setUp() {
-        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, serverApplication);
+        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.server.connection;
 
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageWrapper;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -22,7 +23,7 @@ public class DoctrinNettyServerConnectionTest {
 
     @Test
     public void getMessages() {
-        Observable<JSONObject> messages = doctrinNettyServerConnection.getMessages();
+        Observable<DoctrinMessageWrapper> messages = doctrinNettyServerConnection.getMessages();
 
         assertNotNull(messages);
     }
