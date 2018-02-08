@@ -34,7 +34,7 @@ public interface DoctrinServerConnection {
      * @return The name of the remote.
      */
     Observable<String> getRemoteName();
-
+  
     /**
      * Set the name of the remote acting client.
      *
