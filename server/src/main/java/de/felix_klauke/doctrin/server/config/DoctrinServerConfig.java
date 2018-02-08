@@ -20,14 +20,28 @@ public class DoctrinServerConfig {
     private final int port;
 
     /**
+     * The size of the netty boss group.
+     */
+    private final int bossGroupSize;
+
+    /**
+     * The size of the netty worker group.
+     */
+    private final int workerGroupSize;
+
+    /**
      * Create a new doctrin server config by its underlying data values.
      *
      * @param host The host.
      * @param port The port.
+     * @param bossGroupSize The size of the netty boss group.
+     * @param workerGroupSize The size of the netty worker group.
      */
-    public DoctrinServerConfig(String host, int port) {
+    public DoctrinServerConfig(String host, int port, int bossGroupSize, int workerGroupSize) {
         this.host = host;
         this.port = port;
+        this.bossGroupSize = bossGroupSize;
+        this.workerGroupSize = workerGroupSize;
     }
 
     /**
@@ -46,5 +60,23 @@ public class DoctrinServerConfig {
      */
     public String getHost() {
         return host;
+    }
+
+    /**
+     * Get the size of the netty boss group.
+     *
+     * @return The size of the netty boss group.
+     */
+    public int getBossGroupSize() {
+        return bossGroupSize;
+    }
+
+    /**
+     * Get the size of the netty worker group.
+     *
+     * @return The size of the netty worker group.
+     */
+    public int getWorkerGroupSize() {
+        return workerGroupSize;
     }
 }
