@@ -26,4 +26,18 @@ public interface DoctrinServerConnection {
      * @param jsonObject The content of the message.
      */
     void sendMessage(JSONObject jsonObject);
+
+    /**
+     * Get the name of the remote acting client.
+     *
+     * @return The name of the remote.
+     */
+    String getRemoteName();
+
+    /**
+     * Set the name of the remote acting client.
+     *
+     * @param remoteName The name of the remote.
+     */
+    void setRemoteName(String remoteName);
 }

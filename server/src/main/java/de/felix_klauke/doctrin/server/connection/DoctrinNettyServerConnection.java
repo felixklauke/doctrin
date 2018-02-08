@@ -8,6 +8,8 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 /**
  * The connection to the a client. It represents the last part in the {@link ChannelPipeline} and will handle the
  * instances of {@link JSONObject} coming in. To handle the objects they will be emitted into the {@link #publishSubject}.
@@ -44,6 +46,11 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
      */
     private Channel channel;
 
+    /**
+     * The name of the remote.
+     */
+    private String remoteName = UUID.randomUUID().toString();
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         channel = ctx.channel();
@@ -72,5 +79,15 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
     @Override
     public void sendMessage(JSONObject jsonObject) {
         channel.writeAndFlush(jsonObject);
+    }
+
+    @Override
+    public String getRemoteName() {
+        return remoteName;
+    }
+
+    @Override
+    public void setRemoteName(String remoteName) {
+        this.remoteName = remoteName;
     }
 }
