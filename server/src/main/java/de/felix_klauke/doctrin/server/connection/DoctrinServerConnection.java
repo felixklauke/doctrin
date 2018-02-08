@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.server.connection;
 
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageWrapper;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 
@@ -18,7 +19,7 @@ public interface DoctrinServerConnection {
      *
      * @return The observable of the messages.
      */
-    Observable<JSONObject> getMessages();
+    Observable<DoctrinMessageWrapper> getMessages();
 
     /**
      * Send a new message out in the world.
@@ -32,8 +33,8 @@ public interface DoctrinServerConnection {
      *
      * @return The name of the remote.
      */
-    String getRemoteName();
-
+    Observable<String> getRemoteName();
+  
     /**
      * Set the name of the remote acting client.
      *

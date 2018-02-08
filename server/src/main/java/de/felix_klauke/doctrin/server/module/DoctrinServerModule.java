@@ -5,8 +5,6 @@ import com.google.inject.name.Names;
 import de.felix_klauke.doctrin.server.DoctrinServerApplication;
 import de.felix_klauke.doctrin.server.DoctrinServerApplicationImpl;
 import de.felix_klauke.doctrin.server.config.DoctrinServerConfig;
-import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
-import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 
 /**
  * The module to define or google guice dependencies.

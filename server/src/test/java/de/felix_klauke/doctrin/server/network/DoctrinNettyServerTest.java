@@ -1,5 +1,7 @@
 package de.felix_klauke.doctrin.server.network;
 
+import de.felix_klauke.doctrin.core.DoctrinCoreApplicationImpl;
+import de.felix_klauke.doctrin.server.DoctrinServerApplicationImpl;
 import de.felix_klauke.doctrin.server.channel.DoctrinServerChannelInitializer;
 import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
 import de.felix_klauke.doctrin.server.provider.ServerBootstrapProvider;
@@ -20,7 +22,7 @@ public class DoctrinNettyServerTest {
     public void setUp() {
         doctrinServer = new DoctrinNettyServer("localhost", 9999, new NioEventLoopGroup(1),
                 new NioEventLoopGroup(4), new ServerBootstrapProvider(NioServerSocketChannel.class,
-                new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new)));
+                new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()))));
     }
 
     @Test
