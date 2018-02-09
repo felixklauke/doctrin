@@ -8,7 +8,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>doctrin-server</artifactId>
+    <artifactId>doctrin-core</artifactId>
+
     <build>
         <plugins>
             <!-- Maven Shading -->
@@ -42,28 +43,19 @@
     </build>
 
     <dependencies>
-        <!-- Commons module -->
+        <!-- Commons Module -->
         <dependency>
             <groupId>de.felix_klauke</groupId>
-            <artifactId>doctrin-core</artifactId>
+            <artifactId>doctrin-commons</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- Powermock -->
+        <!-- Testing -->
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>2.0.0-beta.5</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Mockito -->
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>2.0.0-beta.5</version>
-            <scope>test</scope>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
         </dependency>
     </dependencies>
 </project>

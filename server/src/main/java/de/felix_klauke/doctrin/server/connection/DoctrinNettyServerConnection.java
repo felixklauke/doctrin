@@ -1,10 +1,14 @@
 package de.felix_klauke.doctrin.server.connection;
 
+import de.felix_klauke.doctrin.commons.message.DoctrinMessage;
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageWrapper;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
@@ -38,7 +42,12 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
      * will be emitted into this subject, the outgoing will just pass through without this subject noticing at least
      * anything).
      */
-    private final PublishSubject<JSONObject> publishSubject = PublishSubject.create();
+    private final PublishSubject<DoctrinMessageWrapper> publishSubject = PublishSubject.create();
+
+    /**
+     * The subject of the remotes name.
+     */
+    private final BehaviorSubject<String> remoteNameSubject = BehaviorSubject.createDefault(UUID.randomUUID().toString());
 
     /**
      * The Netty channel that represents the raw connection to the client. This should be assigned when the channel
@@ -58,7 +67,11 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, JSONObject msg) {
-        publishSubject.onNext(msg);
+        DoctrinMessageContext doctrinMessageContext = new DoctrinNettyMessageContext(ctx, this);
+        DoctrinMessage doctrinMessage = new DoctrinMessage(msg);
+
+        DoctrinMessageWrapper doctrinMessageWrapper = new DoctrinMessageWrapper(doctrinMessage, doctrinMessageContext);
+        publishSubject.onNext(doctrinMessageWrapper);
     }
 
     @Override
@@ -72,7 +85,7 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
     }
 
     @Override
-    public Observable<JSONObject> getMessages() {
+    public Observable<DoctrinMessageWrapper> getMessages() {
         return publishSubject;
     }
 
@@ -82,12 +95,12 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
     }
 
     @Override
-    public String getRemoteName() {
-        return remoteName;
+    public Observable<String> getRemoteName() {
+        return remoteNameSubject;
     }
 
     @Override
     public void setRemoteName(String remoteName) {
-        this.remoteName = remoteName;
+        remoteNameSubject.onNext(remoteName);
     }
 }
