@@ -16,4 +16,12 @@ public class DoctrinMessage {
     public JSONObject getJsonObject() {
         return jsonObject;
     }
+
+    public ActionCode getActionCode() {
+        if (!jsonObject.has("actionCode")) {
+            return ActionCode.UNKNOWN;
+        }
+
+        return ActionCode.values()[(int) jsonObject.remove("actionCode")];
+    }
 }
