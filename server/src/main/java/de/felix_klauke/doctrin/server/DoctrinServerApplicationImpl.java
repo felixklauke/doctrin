@@ -56,6 +56,8 @@ public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
     public void handleNewConnection(DoctrinServerConnection connection) {
         logger.info("New Connection was established.");
 
-        connection.getMessages().subscribe(doctrinMessageWrapper -> coreApplication.handleMessage(doctrinMessageWrapper.getMessageContext(), doctrinMessageWrapper.getMessage()));
+        connection.getMessages().subscribe(doctrinMessageWrapper -> {
+            coreApplication.handleMessage(doctrinMessageWrapper.getMessageContext(), doctrinMessageWrapper.getMessage());
+        });
     }
 }
