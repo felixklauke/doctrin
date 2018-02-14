@@ -8,6 +8,7 @@ import org.json.JSONObject;
 public class DoctrinMessage {
 
     private final JSONObject jsonObject;
+    private ActionCode actionCode;
 
     public DoctrinMessage(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
@@ -18,10 +19,14 @@ public class DoctrinMessage {
     }
 
     public ActionCode getActionCode() {
+        if (actionCode != null) {
+            return actionCode;
+        }
+
         if (!jsonObject.has("actionCode")) {
             return ActionCode.UNKNOWN;
         }
 
-        return ActionCode.values()[(int) jsonObject.remove("actionCode")];
+        return (actionCode = ActionCode.values()[(int) jsonObject.remove("actionCode")]);
     }
 }
