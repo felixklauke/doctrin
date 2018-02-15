@@ -3,11 +3,13 @@ package de.felix_klauke.doctrin.core;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessage;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
+import de.felix_klauke.doctrin.core.subscription.SubscriptionManagerImpl;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -23,12 +25,9 @@ public class DoctrinCoreApplicationImplTest {
 
     @Before
     public void setUp() {
-        doctrinCoreApplication = new DoctrinCoreApplicationImpl();
-    }
+        doctrinCoreApplication = new DoctrinCoreApplicationImpl(new SubscriptionManagerImpl());
 
-    @Test
-    public void test() {
-
+        Mockito.when(doctrinMessageContext.getRemoteName()).thenReturn("subscriber-01");
     }
 
     @Test

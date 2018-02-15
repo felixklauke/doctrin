@@ -2,6 +2,7 @@ package de.felix_klauke.doctrin.server.channel;
 
 import de.felix_klauke.doctrin.commons.message.DoctrinMessageWrapper;
 import de.felix_klauke.doctrin.core.DoctrinCoreApplicationImpl;
+import de.felix_klauke.doctrin.core.subscription.SubscriptionManager;
 import de.felix_klauke.doctrin.server.DoctrinServerApplicationImpl;
 import de.felix_klauke.doctrin.server.connection.DoctrinNettyServerConnection;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
@@ -10,6 +11,7 @@ import io.reactivex.Observable;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -23,7 +25,7 @@ public class DoctrinServerChannelInitializerTest {
 
     @Before
     public void setUp() {
-        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()));
+        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class))));
     }
 
     @Test
@@ -55,7 +57,7 @@ public class DoctrinServerChannelInitializerTest {
             public void setRemoteName(String remoteName) {
 
             }
-        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()));
+        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class))));
 
         NioServerSocketChannel channel = new NioServerSocketChannel();
         doctrinServerChannelInitializer.initChannel(channel);

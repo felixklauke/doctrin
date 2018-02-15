@@ -2,6 +2,7 @@ package de.felix_klauke.doctrin.core.subscription;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,23 +15,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     /**
      * The current active subscriptions.
      */
-    private final Map<String, Set<Subscriber>> subscriptions;
+    private final Map<String, Set<Subscriber>> subscriptions = Maps.newConcurrentMap();
 
     /**
-     * Create a subscription manager.
+     * The subscribers.
      */
-    public SubscriptionManagerImpl() {
-        this(Maps.newConcurrentMap());
-    }
-
-    /**
-     * Create a new subscription manager by its underlying subscription storage.
-     *
-     * @param subscriptions The subscription storage.
-     */
-    SubscriptionManagerImpl(Map<String, Set<Subscriber>> subscriptions) {
-        this.subscriptions = subscriptions;
-    }
+    private final Map<String, Subscriber> activeSubscribers = Maps.newConcurrentMap();
 
     @Override
     public void addSubscription(String channelName, Subscriber subscriber) {
@@ -73,5 +63,23 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     @Override
     public int getChannelCount() {
         return subscriptions.size();
+    }
+
+    @Override
+    public Subscriber getSubscriber(String remoteName) {
+        return activeSubscribers.get(remoteName);
+    }
+
+    @Override
+    public void updateSubscriberName(Subscriber subscriber, String name) {
+        activeSubscribers.values().remove(subscriber);
+        activeSubscribers.put(name, subscriber);
+    }
+
+    @Override
+    public Subscriber createSubscriber(DoctrinMessageContext messageContext, String remoteName) {
+        SubscriberImpl subscriber = new SubscriberImpl(messageContext);
+        activeSubscribers.put(remoteName, subscriber);
+        return subscriber;
     }
 }

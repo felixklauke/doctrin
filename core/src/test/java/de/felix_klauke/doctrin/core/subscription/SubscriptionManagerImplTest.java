@@ -1,16 +1,11 @@
 package de.felix_klauke.doctrin.core.subscription;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,12 +21,8 @@ public class SubscriptionManagerImplTest {
 
     @Before
     public void setUp() {
-        Map<String, Set<Subscriber>> subscriptions = Maps.newConcurrentMap();
-        Set<Subscriber> subscribers = Sets.newConcurrentHashSet();
-        subscribers.add(testSubscriber);
-        subscriptions.put("test", subscribers);
-
-        subscriptionManager = new SubscriptionManagerImpl(subscriptions);
+        subscriptionManager = new SubscriptionManagerImpl();
+        subscriptionManager.addSubscription("test", testSubscriber);
     }
 
     @Test

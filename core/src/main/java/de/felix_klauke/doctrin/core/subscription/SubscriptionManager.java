@@ -1,5 +1,7 @@
 package de.felix_klauke.doctrin.core.subscription;
 
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
+
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
@@ -42,4 +44,29 @@ public interface SubscriptionManager {
      * @return The channel count.
      */
     int getChannelCount();
+
+    /**
+     * Get the subscriber with the given remote name.
+     *
+     * @param remoteName The remote name.
+     * @return The subscriber.
+     */
+    Subscriber getSubscriber(String remoteName);
+
+    /**
+     * Update the name of the given subscriber.
+     *
+     * @param subscriber The subscriber.
+     * @param name       The name.
+     */
+    void updateSubscriberName(Subscriber subscriber, String name);
+
+    /**
+     * Create a subscriber based on the given message and the given remote name.
+     *
+     * @param messageContext The context of the initial message.
+     * @param remoteName     The remote name.
+     * @return The subscriber.
+     */
+    Subscriber createSubscriber(DoctrinMessageContext messageContext, String remoteName);
 }
