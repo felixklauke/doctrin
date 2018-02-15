@@ -32,6 +32,12 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
 
         Subscriber subscriber = subscriptionManager.getSubscriber(remoteName);
 
+        if (subscriber == null) {
+            subscriber = subscriptionManager.createSubscriber(messageContext, remoteName);
+        }
+
+        subscriber.setLastMessageContext(messageContext);
+
         switch (actionCode) {
             case UPDATE_SUBSCRIBER_NAME: {
                 handleMessageUpdateSubscriberName(subscriber, messageContext, message);

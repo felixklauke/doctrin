@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -25,11 +26,8 @@ public class DoctrinCoreApplicationImplTest {
     @Before
     public void setUp() {
         doctrinCoreApplication = new DoctrinCoreApplicationImpl(new SubscriptionManagerImpl());
-    }
 
-    @Test
-    public void test() {
-
+        Mockito.when(doctrinMessageContext.getRemoteName()).thenReturn("subscriber-01");
     }
 
     @Test

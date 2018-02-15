@@ -2,6 +2,7 @@ package de.felix_klauke.doctrin.core.subscription;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
 
 import java.util.Map;
 import java.util.Set;
@@ -73,5 +74,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     public void updateSubscriberName(Subscriber subscriber, String name) {
         activeSubscribers.values().remove(subscriber);
         activeSubscribers.put(name, subscriber);
+    }
+
+    @Override
+    public Subscriber createSubscriber(DoctrinMessageContext messageContext, String remoteName) {
+        SubscriberImpl subscriber = new SubscriberImpl(messageContext);
+        activeSubscribers.put(remoteName, subscriber);
+        return subscriber;
     }
 }
