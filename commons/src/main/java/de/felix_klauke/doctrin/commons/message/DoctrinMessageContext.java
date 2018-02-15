@@ -7,5 +7,17 @@ import org.json.JSONObject;
  */
 public interface DoctrinMessageContext {
 
-    void resume(JSONObject jsonObject);
+    /**
+     * Send the given object to the client.
+     *
+     * @param jsonObject The object.
+     */
+    void sendObject(JSONObject jsonObject);
+
+    /**
+     * Get the name of the remote.
+     *
+     * @return The name.
+     */
+    String getRemoteName();
 }
