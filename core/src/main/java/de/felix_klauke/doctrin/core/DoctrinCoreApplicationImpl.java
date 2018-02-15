@@ -11,6 +11,7 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
 
     @Override
     public void handleMessage(DoctrinMessageContext messageContext, DoctrinMessage message) {
+        String remoteName = messageContext.getRemoteName();
         ActionCode actionCode = message.getActionCode();
 
         switch (actionCode) {

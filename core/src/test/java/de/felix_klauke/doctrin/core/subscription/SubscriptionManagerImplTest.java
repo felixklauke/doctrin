@@ -4,6 +4,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 import java.util.Set;
@@ -13,17 +17,18 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SubscriptionManagerImplTest {
 
-    private static final Subscriber TEST_SUBSCRIBER = new Subscriber() {
-    };
+    @Mock
+    private Subscriber testSubscriber;
     private SubscriptionManagerImpl subscriptionManager;
 
     @Before
     public void setUp() {
         Map<String, Set<Subscriber>> subscriptions = Maps.newConcurrentMap();
         Set<Subscriber> subscribers = Sets.newConcurrentHashSet();
-        subscribers.add(TEST_SUBSCRIBER);
+        subscribers.add(testSubscriber);
         subscriptions.put("test", subscribers);
 
         subscriptionManager = new SubscriptionManagerImpl(subscriptions);
@@ -42,8 +47,7 @@ public class SubscriptionManagerImplTest {
         assertEquals(1, subscriptionManager.getChannelCount());
         assertEquals(1, subscriptionManager.getSubscriptions("test").length);
 
-        subscriptionManager.addSubscription("test", new Subscriber() {
-        });
+        subscriptionManager.addSubscription("test", Mockito.mock(Subscriber.class));
 
         assertEquals(2, subscriptionManager.getSubscriptions("test").length);
         assertEquals(1, subscriptionManager.getChannelCount());
@@ -54,7 +58,7 @@ public class SubscriptionManagerImplTest {
         assertEquals(1, subscriptionManager.getChannelCount());
         assertEquals(1, subscriptionManager.getSubscriptions("test").length);
 
-        subscriptionManager.removeSubscription("test", TEST_SUBSCRIBER);
+        subscriptionManager.removeSubscription("test", testSubscriber);
 
         assertEquals(0, subscriptionManager.getSubscriptions("test").length);
         assertEquals(0, subscriptionManager.getChannelCount());
@@ -62,7 +66,7 @@ public class SubscriptionManagerImplTest {
 
     @Test
     public void removeSubscriptions() {
-        subscriptionManager.removeSubscriptions(TEST_SUBSCRIBER);
+        subscriptionManager.removeSubscriptions(testSubscriber);
 
         assertEquals(0, subscriptionManager.getSubscriptions("test").length);
         assertEquals(0, subscriptionManager.getChannelCount());
