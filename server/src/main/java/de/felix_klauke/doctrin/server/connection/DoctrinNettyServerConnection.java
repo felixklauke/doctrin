@@ -55,11 +55,6 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
      */
     private Channel channel;
 
-    /**
-     * The name of the remote.
-     */
-    private String remoteName = UUID.randomUUID().toString();
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         channel = ctx.channel();

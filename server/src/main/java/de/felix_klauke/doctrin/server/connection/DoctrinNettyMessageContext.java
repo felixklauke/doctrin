@@ -21,4 +21,9 @@ public class DoctrinNettyMessageContext implements DoctrinMessageContext {
     public void sendObject(JSONObject jsonObject) {
         doctrinNettyServerConnection.sendMessage(jsonObject);
     }
+
+    @Override
+    public String getRemoteName() {
+        return doctrinNettyServerConnection.getRemoteName().blockingLast();
+    }
 }
