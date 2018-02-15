@@ -42,4 +42,20 @@ public interface SubscriptionManager {
      * @return The channel count.
      */
     int getChannelCount();
+
+    /**
+     * Get the subscriber with the given remote name.
+     *
+     * @param remoteName The remote name.
+     * @return The subscriber.
+     */
+    Subscriber getSubscriber(String remoteName);
+
+    /**
+     * Update the name of the given subscriber.
+     *
+     * @param subscriber The subscriber.
+     * @param name       The name.
+     */
+    void updateSubscriberName(Subscriber subscriber, String name);
 }

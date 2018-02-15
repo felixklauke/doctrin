@@ -23,7 +23,7 @@ public class DoctrinServerChannelInitializerTest {
 
     @Before
     public void setUp() {
-        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()));
+        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(subscriptionManager)));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class DoctrinServerChannelInitializerTest {
             public void setRemoteName(String remoteName) {
 
             }
-        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl()));
+        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(subscriptionManager)));
 
         NioServerSocketChannel channel = new NioServerSocketChannel();
         doctrinServerChannelInitializer.initChannel(channel);

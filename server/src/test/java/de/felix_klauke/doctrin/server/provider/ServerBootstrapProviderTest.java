@@ -22,7 +22,7 @@ public class ServerBootstrapProviderTest {
 
     @Before
     public void setUp() {
-        serverBootstrapProvider = new ServerBootstrapProvider(NioServerSocketChannel.class, new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl())));
+        serverBootstrapProvider = new ServerBootstrapProvider(NioServerSocketChannel.class, new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(subscriptionManager))));
     }
 
     @Test

@@ -3,6 +3,7 @@ package de.felix_klauke.doctrin.core;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessage;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
+import de.felix_klauke.doctrin.core.subscription.SubscriptionManagerImpl;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class DoctrinCoreApplicationImplTest {
 
     @Before
     public void setUp() {
-        doctrinCoreApplication = new DoctrinCoreApplicationImpl();
+        doctrinCoreApplication = new DoctrinCoreApplicationImpl(new SubscriptionManagerImpl());
     }
 
     @Test
