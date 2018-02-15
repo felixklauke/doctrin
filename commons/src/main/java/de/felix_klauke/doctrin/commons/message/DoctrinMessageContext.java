@@ -7,5 +7,5 @@ import org.json.JSONObject;
  */
 public interface DoctrinMessageContext {
 
-    void resume(JSONObject jsonObject);
+    void sendObject(JSONObject jsonObject);
 }

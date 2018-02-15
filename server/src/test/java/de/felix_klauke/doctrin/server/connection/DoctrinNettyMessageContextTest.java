@@ -31,7 +31,7 @@ public class DoctrinNettyMessageContextTest {
 
         // When
 
-        doctrinNettyMessageContext.resume(jsonObject);
+        doctrinNettyMessageContext.sendObject(jsonObject);
 
         // Then
         Mockito.verify(doctrinServerConnection).sendMessage(jsonObject);
