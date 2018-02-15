@@ -11,17 +11,39 @@ import static org.junit.Assert.assertEquals;
  */
 public class DoctrinMessageTest {
 
-    private static final JSONObject TEST_JSON_OBJECT = new JSONObject().put("name", "xilef");
+    private final JSONObject testJsonObject = new JSONObject()
+            .put("actionCode", ActionCode.UPDATE_SUBSCRIBER_NAME.ordinal())
+            .put("name", "xilef");
 
     private DoctrinMessage doctrinMessage;
 
     @Before
     public void setUp() {
-        doctrinMessage = new DoctrinMessage(TEST_JSON_OBJECT);
+        doctrinMessage = new DoctrinMessage(testJsonObject);
     }
 
     @Test
     public void getJsonObject() {
-        assertEquals(TEST_JSON_OBJECT, doctrinMessage.getJsonObject());
+        assertEquals(testJsonObject, doctrinMessage.getJsonObject());
+    }
+
+    @Test
+    public void getActionCode() {
+        ActionCode actionCode = doctrinMessage.getActionCode();
+
+        assertEquals(ActionCode.UPDATE_SUBSCRIBER_NAME, actionCode);
+
+        // cache hit
+        actionCode = doctrinMessage.getActionCode();
+
+        assertEquals(ActionCode.UPDATE_SUBSCRIBER_NAME, actionCode);
+    }
+
+    @Test
+    public void getUnknownActionCode() {
+        testJsonObject.remove("actionCode");
+        ActionCode actionCode = doctrinMessage.getActionCode();
+
+        assertEquals(ActionCode.UNKNOWN, actionCode);
     }
 }
