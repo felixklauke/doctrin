@@ -20,4 +20,11 @@ public interface DoctrinMessageContext {
      * @return The name.
      */
     String getRemoteName();
+
+    /**
+     * Set the remote name.
+     *
+     * @param name The name.
+     */
+    void setRemoteName(String name);
 }
