@@ -8,6 +8,7 @@ import de.felix_klauke.doctrin.core.subscription.SubscriptionManager;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -43,14 +44,60 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
                 handleMessageUpdateSubscriberName(subscriber, messageContext, message);
                 break;
             }
+            case SUBSCRIBE: {
+                handleMessageSubscribe(subscriber, message);
+                break;
+            }
+            case UNSUBSCRIBE: {
+                handleMessageUnsubscribe(subscriber, message);
+                break;
+            }
+            case PUBLISH: {
+                handleMessagePublish(subscriber, message);
+            }
         }
+    }
+
+    /**
+     * Handle that the given subscriber wants to publish something.
+     *
+     * @param subscriber The subscriber.
+     * @param message    The message.
+     */
+    private void handleMessagePublish(Subscriber subscriber, DoctrinMessage message) {
+        String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
+        Subscriber[] subscriptions = subscriptionManager.getSubscriptions(channelName);
+
+        Arrays.stream(subscriptions).filter(subscription -> subscriber != subscription).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
+    }
+
+    /**
+     * Handle that the given subscriber wants to unsubscribe from a channel.
+     *
+     * @param subscriber The subscriber.
+     * @param message    The message.
+     */
+    private void handleMessageUnsubscribe(Subscriber subscriber, DoctrinMessage message) {
+        String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
+        subscriptionManager.removeSubscription(channelName, subscriber);
+    }
+
+    /**
+     * Handle that the given subscriber wants to subscribe to a channel.
+     *
+     * @param subscriber The subscriber.
+     * @param message    The message,
+     */
+    private void handleMessageSubscribe(Subscriber subscriber, DoctrinMessage message) {
+        String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
+        subscriptionManager.addSubscription(channelName, subscriber);
     }
 
     /**
      * Handle that the given subscriber wants to update its remote name.
      *
      * @param subscriber     The subscriber.
-     * @param messageContext The context of the mssage.
+     * @param messageContext The context of the message.
      * @param message        The message.
      */
     private void handleMessageUpdateSubscriberName(Subscriber subscriber, DoctrinMessageContext messageContext, DoctrinMessage message) {
