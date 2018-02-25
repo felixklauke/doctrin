@@ -43,8 +43,8 @@
     </build>
 
     <dependencies>
+        <!-- Google Guice Dependency Injection -->
         <dependency>
-            <!-- Google Guice Dependency Injection -->
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <version>4.1.0</version>
@@ -65,6 +65,14 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
