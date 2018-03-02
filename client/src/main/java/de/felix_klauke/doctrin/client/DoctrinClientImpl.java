@@ -1,6 +1,7 @@
 package de.felix_klauke.doctrin.client;
 
 import com.google.common.collect.Maps;
+import de.felix_klauke.doctrin.client.exception.NoSuchSubscriptionException;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
@@ -28,6 +29,19 @@ public class DoctrinClientImpl implements DoctrinClient {
         PublishSubject<JSONObject> subject = PublishSubject.create();
         subscriptions.put(channelName, subject);
 
+        subject.doOnComplete(() -> subscriptions.remove(channelName));
+
         return subject;
+    }
+
+    @Override
+    public void unsubscribeChannel(String channelName) {
+        PublishSubject<JSONObject> subject = subscriptions.get(channelName);
+
+        if (subject == null) {
+            throw new NoSuchSubscriptionException("No subscription on channel " + channelName + ".");
+        }
+
+        subject.onComplete();
     }
 }
