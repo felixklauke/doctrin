@@ -15,4 +15,11 @@ public interface DoctrinClient {
      * @return The channel name.
      */
     Observable<JSONObject> subscribeChannel(String channelName);
+
+    /**
+     * Unsubscribe from the given channel.
+     *
+     * @param channelName The channel name.
+     */
+    void unsubscribeChannel(String channelName);
 }
