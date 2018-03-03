@@ -136,6 +136,17 @@ public class DoctrinClientImpl implements DoctrinClient {
         networkClient.sendMessage(jsonObject);
     }
 
+    @Override
+    public void setSubscriberName(String subscriberName) {
+        logger.info("Updating subscriber name to {}.", subscriberName);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("actionCode", ActionCode.UPDATE_SUBSCRIBER_NAME.ordinal());
+        jsonObject.put("name", subscriberName);
+
+        networkClient.sendMessage(jsonObject);
+    }
+
     private void sendSubscribeMessage(String channelName) {
         networkClient.sendMessage(new JSONObject()
                 .put("actionCode", ActionCode.SUBSCRIBE.ordinal())
