@@ -52,4 +52,11 @@ public interface DoctrinClient {
      * @param jsonObject The json object.
      */
     void publishOther(String channel, JSONObject jsonObject);
+
+    /**
+     * Set the name of the subscriber.
+     *
+     * @param subscriberName The name of the subscriber.
+     */
+    void setSubscriberName(String subscriberName);
 }
