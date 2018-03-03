@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.client.net;
 
+import com.google.common.collect.Queues;
 import de.felix_klauke.doctrin.client.channel.DoctrinClientChannelInitializer;
 import de.felix_klauke.doctrin.client.connection.DoctrinClientConnection;
 import io.netty.bootstrap.Bootstrap;
@@ -14,11 +15,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 
+import java.util.Queue;
+
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class NetworkClientImpl implements NetworkClient {
 
+    private final Queue<JSONObject> sendingQueue = Queues.newConcurrentLinkedQueue();
     private final EventLoopGroup workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
     private final String host;
     private final int port;
@@ -57,9 +61,21 @@ public class NetworkClientImpl implements NetworkClient {
 
             channel = bootstrap.connect(host, port)
                     .sync().channel();
+
+            processSendingQueue();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void sendMessage(JSONObject jsonObject) {
+        if (isConnected()) {
+            sendingQueue.offer(jsonObject);
+            return;
+        }
+
+        clientConnection.sendMessage(jsonObject);
     }
 
     @Override
@@ -77,8 +93,14 @@ public class NetworkClientImpl implements NetworkClient {
         return messages;
     }
 
-    @Override
-    public void sendMessage(JSONObject jsonObject) {
-        clientConnection.sendMessage(jsonObject);
+    /**
+     * Process all elements that are left in the sending queue.
+     */
+    private void processSendingQueue() {
+        while (isConnected() && sendingQueue.isEmpty()) {
+            JSONObject jsonObject = sendingQueue.poll();
+
+            sendMessage(jsonObject);
+        }
     }
 }
