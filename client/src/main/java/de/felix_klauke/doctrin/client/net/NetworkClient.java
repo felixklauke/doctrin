@@ -11,7 +11,7 @@ public interface NetworkClient {
     /**
      * Connect to the server.
      */
-    void connect();
+    Observable<Boolean> connect();
 
     /**
      * Check if the client is connected.
