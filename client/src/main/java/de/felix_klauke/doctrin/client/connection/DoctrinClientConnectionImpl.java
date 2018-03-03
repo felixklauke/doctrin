@@ -17,6 +17,11 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
      */
     private final PublishSubject<JSONObject> publishSubject = PublishSubject.create();
 
+    /**
+     * The connected subject that will emit whenever the connection state changes.
+     */
+    private final PublishSubject<Boolean> connectedSubject = PublishSubject.create();
+
     private Channel lastChannel;
 
     public DoctrinClientConnectionImpl(Channel lastChannel) {
@@ -29,18 +34,31 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
     }
 
     @Override
+    public Observable<Boolean> getConnected() {
+        return connectedSubject;
+    }
+
+    @Override
     public void sendMessage(JSONObject jsonObject) {
         lastChannel.writeAndFlush(jsonObject);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+        connectedSubject.onNext(true);
         lastChannel = ctx.channel();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+        System.out.println("INACTIVE!");
+        connectedSubject.onNext(false);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
+        connectedSubject.onError(cause);
     }
 
     @Override

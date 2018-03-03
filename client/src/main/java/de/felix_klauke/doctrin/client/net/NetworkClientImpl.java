@@ -15,6 +15,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.Queue;
 
 /**
@@ -48,24 +50,39 @@ public class NetworkClientImpl implements NetworkClient {
     private void handleClientConnection(DoctrinClientConnection doctrinClientConnection) {
         messages = doctrinClientConnection.getMessages();
         clientConnection = doctrinClientConnection;
+
+        clientConnection.getConnected().filter(aBoolean -> !aBoolean).subscribe(aBoolean -> connect().retryWhen(throwableObservable -> throwableObservable
+                .flatMap(throwable -> {
+                            if (throwable instanceof IOException) {
+                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                return Observable.timer(1, TimeUnit.SECONDS);
+                            }
+
+                            return Observable.error(throwable);
+                        }
+                )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!")));
     }
 
     @Override
-    public void connect() {
-        try {
-            Bootstrap bootstrap = new Bootstrap()
-                    .group(workerGroup)
-                    .handler(channelInitializer)
-                    .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true);
+    public Observable<Boolean> connect() {
 
-            channel = bootstrap.connect(host, port)
-                    .sync().channel();
+        return Observable.create(observableEmitter -> {
+            try {
+                Bootstrap bootstrap = new Bootstrap()
+                        .group(workerGroup)
+                        .handler(channelInitializer)
+                        .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
+                        .option(ChannelOption.TCP_NODELAY, true);
 
-            processSendingQueue();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+                channel = bootstrap.connect(host, port)
+                        .sync().channel();
+
+                observableEmitter.onNext(true);
+                observableEmitter.onComplete();
+            } catch (InterruptedException e) {
+                observableEmitter.onError(e);
+            }
+        });
     }
 
     @Override

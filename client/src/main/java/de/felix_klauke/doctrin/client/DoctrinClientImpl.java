@@ -10,7 +10,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Felix Klauke <fklauke@itemis.de>
@@ -37,11 +39,24 @@ public class DoctrinClientImpl implements DoctrinClient {
     }
 
     @Override
-    public void connect() {
-        networkClient.connect();
+    public Observable<Boolean> connect() {
+        Observable<Boolean> connectObservable = networkClient.connect().retryWhen(throwableObservable ->
+                throwableObservable.flatMap(throwable -> {
+                            if (throwable instanceof IOException) {
+                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                return Observable.timer(1, TimeUnit.SECONDS);
+                            }
 
-        Observable<JSONObject> messages = networkClient.getMessages();
-        messageSubscription = messages.subscribe(this::handleMessage);
+                            return Observable.error(throwable);
+                        }
+                ));
+
+        connectObservable.doOnNext(aBoolean -> {
+            Observable<JSONObject> messages = networkClient.getMessages();
+            messageSubscription = messages.subscribe(this::handleMessage);
+        });
+
+        return connectObservable;
     }
 
     @Override
