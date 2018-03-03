@@ -28,6 +28,8 @@ public class JsonDecoderTest {
         jsonDecoder = new JsonDecoder();
 
         JsonEncoder jsonEncoder = new JsonEncoder();
+        // content length
+        TEST_BUFFER.writeInt(1);
         jsonEncoder.encode(null, TEST_CONTENT, TEST_BUFFER);
     }
 
@@ -38,6 +40,7 @@ public class JsonDecoderTest {
         try {
             jsonDecoder.decode(null, TEST_BUFFER, objects);
         } catch (Exception e) {
+            e.printStackTrace();
             Assert.fail();
         }
 
