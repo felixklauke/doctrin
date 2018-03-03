@@ -21,7 +21,7 @@ public class DoctrinClientImplTest {
 
     @Before
     public void setUp() {
-        doctrinClient = new DoctrinClientImpl();
+        doctrinClient = new DoctrinClientImpl("localhost", 8085);
     }
 
     @Test

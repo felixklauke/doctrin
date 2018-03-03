@@ -22,4 +22,12 @@ public interface DoctrinClient {
      * @param channelName The channel name.
      */
     void unsubscribeChannel(String channelName);
+
+    /**
+     * Publish the given json object to the given channel.
+     *
+     * @param channel    The channel.
+     * @param jsonObject the json object.
+     */
+    void publish(String channel, JSONObject jsonObject);
 }

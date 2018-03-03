@@ -22,7 +22,7 @@ public class DoctrinServerBootstrap {
      * @param args The cli arguments.
      */
     public static void main(String[] args) {
-        DoctrinServerConfig doctrinServerConfig = new DoctrinServerConfig("0.0.0.0", 8085, 1, 4);
+        DoctrinServerConfig doctrinServerConfig = new DoctrinServerConfig("localhost", 8085, 1, 4);
 
         Injector injector = Guice.createInjector(new DoctrinServerModule(doctrinServerConfig));
         DoctrinServerApplication application = injector.getInstance(DoctrinServerApplication.class);

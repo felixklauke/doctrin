@@ -2,7 +2,12 @@ package de.felix_klauke.doctrin.client;
 
 import com.google.common.collect.Maps;
 import de.felix_klauke.doctrin.client.exception.NoSuchSubscriptionException;
+import de.felix_klauke.doctrin.client.net.NetworkClient;
+import de.felix_klauke.doctrin.client.net.NetworkClientImpl;
+import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
+import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
@@ -18,6 +23,40 @@ public class DoctrinClientImpl implements DoctrinClient {
      */
     private final Map<String, PublishSubject<JSONObject>> subscriptions = Maps.newConcurrentMap();
 
+    /**
+     * The network client for connection with the doctrin server.
+     */
+    private final NetworkClient networkClient;
+
+    /**
+     * The subscription of the messages that come from the client.
+     */
+    private final Disposable messageSubscription;
+
+    public DoctrinClientImpl(String host, int port) {
+        networkClient = new NetworkClientImpl(host, port);
+        networkClient.connect();
+
+        Observable<JSONObject> messages = networkClient.getMessages();
+        messageSubscription = messages.subscribe(this::handleMessage);
+    }
+
+    private void handleMessage(JSONObject jsonObject) {
+        String channel = (String) jsonObject.remove("targetChannel");
+
+        if (channel == null) {
+            throw new MissingTargetChannelException("The message " + jsonObject + " misses target channel field.");
+        }
+
+        PublishSubject<JSONObject> subject = subscriptions.get(channel);
+
+        if (subject == null) {
+            return;
+        }
+
+        subject.onNext(jsonObject);
+    }
+
     @Override
     public Observable<JSONObject> subscribeChannel(String channelName) {
         Observable<JSONObject> subscription = subscriptions.get(channelName);
@@ -28,6 +67,8 @@ public class DoctrinClientImpl implements DoctrinClient {
 
         PublishSubject<JSONObject> subject = PublishSubject.create();
         subscriptions.put(channelName, subject);
+
+        networkClient.sendMessage(new JSONObject().put("actionCode", ActionCode.SUBSCRIBE.ordinal()).put("targetChannel", channelName));
 
         subject.doOnComplete(() -> subscriptions.remove(channelName));
 
@@ -43,5 +84,13 @@ public class DoctrinClientImpl implements DoctrinClient {
         }
 
         subject.onComplete();
+    }
+
+    @Override
+    public void publish(String channel, JSONObject jsonObject) {
+        jsonObject.put("targetChannel", channel);
+        jsonObject.put("actionCode", ActionCode.PUBLISH.ordinal());
+
+        networkClient.sendMessage(jsonObject);
     }
 }

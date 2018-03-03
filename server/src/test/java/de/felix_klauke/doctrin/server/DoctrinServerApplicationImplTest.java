@@ -36,7 +36,7 @@ public class DoctrinServerApplicationImplTest {
 
     @Before
     public void setUp() {
-        doctrinServerApplication = new DoctrinServerApplicationImpl(doctrinCoreApplication);
+        doctrinServerApplication = new DoctrinServerApplicationImpl(doctrinCoreApplication, null);
     }
 
     @After

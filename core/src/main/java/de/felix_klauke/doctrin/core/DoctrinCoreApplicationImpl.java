@@ -68,7 +68,9 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
         String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
         Subscriber[] subscriptions = subscriptionManager.getSubscriptions(channelName);
 
-        Arrays.stream(subscriptions).filter(subscription -> subscriber != subscription).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
+        message.getJsonObject().put("targetChannel", channelName);
+
+        Arrays.stream(subscriptions).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
     }
 
     /**

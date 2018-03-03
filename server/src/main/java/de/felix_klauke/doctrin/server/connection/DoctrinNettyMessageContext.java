@@ -24,7 +24,7 @@ public class DoctrinNettyMessageContext implements DoctrinMessageContext {
 
     @Override
     public String getRemoteName() {
-        return doctrinNettyServerConnection.getRemoteName().blockingLast();
+        return doctrinNettyServerConnection.getRemoteName().blockingFirst();
     }
 
     @Override
