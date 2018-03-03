@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.client.net;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 import de.felix_klauke.doctrin.client.channel.DoctrinClientChannelInitializer;
 import de.felix_klauke.doctrin.client.connection.DoctrinClientConnection;
@@ -13,24 +14,29 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class NetworkClientImpl implements NetworkClient {
 
+    private final Logger logger = LoggerFactory.getLogger(NetworkClientImpl.class);
     private final Queue<JSONObject> sendingQueue = Queues.newConcurrentLinkedQueue();
     private final EventLoopGroup workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
     private final String host;
     private final int port;
     private final DoctrinClientChannelInitializer channelInitializer;
     private Channel channel;
-    private Observable<JSONObject> messages;
+    private final PublishSubject<JSONObject> messages = PublishSubject.create();
+    private final PublishSubject<Boolean> reconnects = PublishSubject.create();
     private DoctrinClientConnection clientConnection;
 
     public NetworkClientImpl(String host, int port) {
@@ -48,26 +54,41 @@ public class NetworkClientImpl implements NetworkClient {
      * @param doctrinClientConnection The connection.
      */
     private void handleClientConnection(DoctrinClientConnection doctrinClientConnection) {
-        messages = doctrinClientConnection.getMessages();
         clientConnection = doctrinClientConnection;
 
-        clientConnection.getConnected().filter(aBoolean -> !aBoolean).subscribe(aBoolean -> connect().retryWhen(throwableObservable -> throwableObservable
-                .flatMap(throwable -> {
-                            if (throwable instanceof IOException) {
-                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
-                                return Observable.timer(1, TimeUnit.SECONDS);
-                            }
+        clientConnection.getMessages().subscribe(messages);
 
-                            return Observable.error(throwable);
-                        }
-                )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!")));
+        clientConnection.getConnected().subscribe(aBoolean -> {
+            if (aBoolean) {
+                processSendingQueue();
+                return;
+            }
+
+            connect().retryWhen(throwableObservable -> throwableObservable
+                    .flatMap(throwable -> {
+                                if (throwable instanceof IOException) {
+                                    reconnects.onNext(true);
+
+                                    logger.error("Connecting failed: {} - Retrying...", throwable.getMessage());
+                                    return Observable.timer(1, TimeUnit.SECONDS);
+                                }
+
+                                return Observable.error(throwable);
+                            }
+                    ))
+                    .subscribe(aBoolean1 -> {
+                        logger.info("Reconnected successfully.");
+                        reconnects.onNext(true);
+                    });
+        });
     }
 
     @Override
     public Observable<Boolean> connect() {
-
         return Observable.create(observableEmitter -> {
             try {
+                logger.info("Connecting to {}:{}.", host, port);
+
                 Bootstrap bootstrap = new Bootstrap()
                         .group(workerGroup)
                         .handler(channelInitializer)
@@ -76,6 +97,8 @@ public class NetworkClientImpl implements NetworkClient {
 
                 channel = bootstrap.connect(host, port)
                         .sync().channel();
+
+                logger.info("Connected to {}:{} successfully.", host, port);
 
                 observableEmitter.onNext(true);
                 observableEmitter.onComplete();
@@ -86,8 +109,24 @@ public class NetworkClientImpl implements NetworkClient {
     }
 
     @Override
+    public boolean isConnected() {
+        return !workerGroup.isShutdown() && channel != null && channel.isActive();
+    }
+
+    @Override
+    public void disconnect() {
+        workerGroup.shutdownGracefully();
+        messages.onComplete();
+        reconnects.onComplete();
+    }
+
+    @Override
     public void sendMessage(JSONObject jsonObject) {
-        if (isConnected()) {
+        Preconditions.checkNotNull(jsonObject, "Message may not be null.");
+
+        if (!isConnected()) {
+            logger.info("It seems like there is no connection to the server. Storing message {} in sending queue.", jsonObject);
+
             sendingQueue.offer(jsonObject);
             return;
         }
@@ -96,13 +135,8 @@ public class NetworkClientImpl implements NetworkClient {
     }
 
     @Override
-    public boolean isConnected() {
-        return !workerGroup.isShutdown() && channel.isActive();
-    }
-
-    @Override
-    public void disconnect() {
-        workerGroup.shutdownGracefully();
+    public Observable<Boolean> getReconnect() {
+        return reconnects;
     }
 
     @Override
@@ -114,7 +148,9 @@ public class NetworkClientImpl implements NetworkClient {
      * Process all elements that are left in the sending queue.
      */
     private void processSendingQueue() {
-        while (isConnected() && sendingQueue.isEmpty()) {
+        logger.info("Working on Sending Queue... Sending queue contains {} items.", sendingQueue.size());
+
+        while (!sendingQueue.isEmpty()) {
             JSONObject jsonObject = sendingQueue.poll();
 
             sendMessage(jsonObject);

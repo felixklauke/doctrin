@@ -35,6 +35,11 @@ public class SubscriberImpl implements Subscriber {
     }
 
     @Override
+    public String getName() {
+        return lastMessageContext.getRemoteName();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

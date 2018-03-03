@@ -23,7 +23,7 @@
         </triggeringPolicy>
     </appender>
 
-    <logger name="de.felix_klauke.doctrin.server" level="DEBUG" additivity="false">
+    <logger name="de.felix_klauke.doctrin.client" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>

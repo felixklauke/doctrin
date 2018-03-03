@@ -3,6 +3,8 @@ package de.felix_klauke.doctrin.server.network;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -12,6 +14,8 @@ import javax.inject.Provider;
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinNettyServer implements DoctrinServer {
+
+    private final Logger logger = LoggerFactory.getLogger(DoctrinNettyServer.class);
 
     /**
      * The host the server is listening on.
@@ -57,14 +61,20 @@ public class DoctrinNettyServer implements DoctrinServer {
 
     @Override
     public void start() {
+        logger.info("Initializing server bootstrap.");
+
         ServerBootstrap serverBootstrap = serverBootstrapProvider.get();
 
         try {
+            logger.info("Binding server bootstrap on {}:{}.", serverHost, serverPort);
+
             channel = serverBootstrap
                     .group(bossGroup, workerGroup)
                     .bind(serverHost, serverPort)
                     .sync()
                     .channel();
+
+            logger.info("Bound server bootstrap on {}:{}.", serverHost, serverPort);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

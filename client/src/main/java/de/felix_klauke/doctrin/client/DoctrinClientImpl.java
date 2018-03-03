@@ -6,9 +6,11 @@ import de.felix_klauke.doctrin.client.net.NetworkClient;
 import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,6 +20,11 @@ import java.util.concurrent.TimeUnit;
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinClientImpl implements DoctrinClient {
+
+    /**
+     * The logger to log all general client actions.
+     */
+    private final Logger logger = LoggerFactory.getLogger(DoctrinClientImpl.class);
 
     /**
      * The storage for all active subscriptions. Will be used as a cache for duplication reasons.
@@ -32,53 +39,62 @@ public class DoctrinClientImpl implements DoctrinClient {
     /**
      * The subscription of the messages that come from the client.
      */
-    private Disposable messageSubscription;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public DoctrinClientImpl(NetworkClient networkClient) {
+    DoctrinClientImpl(NetworkClient networkClient) {
         this.networkClient = networkClient;
     }
 
     @Override
     public Observable<Boolean> connect() {
+        logger.info("Connecting to the server.");
+
         Observable<Boolean> connectObservable = networkClient.connect().retryWhen(throwableObservable ->
                 throwableObservable.flatMap(throwable -> {
                             if (throwable instanceof IOException) {
-                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                logger.error("Error while connecting to the server. Error was IO based: " + throwable.getMessage() + " - Reconnecting...");
                                 return Observable.timer(1, TimeUnit.SECONDS);
                             }
 
+                    logger.error("Error while connecting to the server. The error was not IO based and will be delegated to the user: " + throwable.getMessage());
                             return Observable.error(throwable);
                         }
                 ));
 
-        connectObservable.doOnNext(aBoolean -> {
-            Observable<JSONObject> messages = networkClient.getMessages();
-            messageSubscription = messages.subscribe(this::handleMessage);
-        });
+        // TODO: Bulk subscribe
+        networkClient.getReconnect().filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
+                .subscribe(reconnectAttemptSuccessful -> subscriptions.keySet().forEach(this::sendSubscribeMessage));
 
+        Observable<JSONObject> messages = networkClient.getMessages();
+        compositeDisposable.add(messages.subscribe(this::handleMessage));
         return connectObservable;
     }
 
     @Override
     public void disconnect() {
+        logger.info("Disconnecting...");
+
         networkClient.disconnect();
-        messageSubscription.dispose();
+        compositeDisposable.dispose();
+
+        logger.info("Disconnected...");
     }
 
     @Override
     public Observable<JSONObject> subscribeChannel(String channelName) {
+        logger.info("A subscription on the channel {} was scheduled.", channelName);
+
         Observable<JSONObject> subscription = subscriptions.get(channelName);
 
         if (subscription != null) {
+            logger.info("Found existing subscription on channel {}, restoring.", channelName);
             return subscription;
         }
 
         PublishSubject<JSONObject> subject = PublishSubject.create();
         subscriptions.put(channelName, subject);
 
-        networkClient.sendMessage(new JSONObject()
-                .put("actionCode", ActionCode.SUBSCRIBE.ordinal())
-                .put("targetChannel", channelName));
+        sendSubscribeMessage(channelName);
 
         subject.doOnComplete(() -> subscriptions.remove(channelName));
 
@@ -86,15 +102,9 @@ public class DoctrinClientImpl implements DoctrinClient {
     }
 
     @Override
-    public void publishOther(String channel, JSONObject jsonObject) {
-        jsonObject.put("targetChannel", channel);
-        jsonObject.put("actionCode", ActionCode.PUBLISH_OTHER.ordinal());
-
-        networkClient.sendMessage(jsonObject);
-    }
-
-    @Override
     public void unsubscribeChannel(String channelName) {
+        logger.info("Unsubscribing from channel {}.", channelName);
+
         PublishSubject<JSONObject> subject = subscriptions.get(channelName);
 
         if (subject == null) {
@@ -102,14 +112,34 @@ public class DoctrinClientImpl implements DoctrinClient {
         }
 
         subject.onComplete();
+
+        logger.info("Unsubscribed from channel {}.", channelName);
     }
 
     @Override
     public void publish(String channel, JSONObject jsonObject) {
+        logger.debug("Publishing {} to channel {}.", jsonObject, channel);
+
         jsonObject.put("targetChannel", channel);
         jsonObject.put("actionCode", ActionCode.PUBLISH.ordinal());
 
         networkClient.sendMessage(jsonObject);
+    }
+
+    @Override
+    public void publishOther(String channel, JSONObject jsonObject) {
+        logger.debug("Publishing {} to channel {} to all other subscribers.", jsonObject, channel);
+
+        jsonObject.put("targetChannel", channel);
+        jsonObject.put("actionCode", ActionCode.PUBLISH_OTHER.ordinal());
+
+        networkClient.sendMessage(jsonObject);
+    }
+
+    private void sendSubscribeMessage(String channelName) {
+        networkClient.sendMessage(new JSONObject()
+                .put("actionCode", ActionCode.SUBSCRIBE.ordinal())
+                .put("targetChannel", channelName));
     }
 
     /**
@@ -118,6 +148,8 @@ public class DoctrinClientImpl implements DoctrinClient {
      * @param jsonObject The json object.
      */
     private void handleMessage(JSONObject jsonObject) {
+        logger.debug("Handling incoming message {}.", jsonObject);
+
         String channel = (String) jsonObject.remove("targetChannel");
 
         if (channel == null) {
