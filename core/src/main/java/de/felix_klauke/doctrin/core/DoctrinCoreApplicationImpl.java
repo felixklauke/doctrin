@@ -6,6 +6,8 @@ import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
 import de.felix_klauke.doctrin.core.subscription.Subscriber;
 import de.felix_klauke.doctrin.core.subscription.SubscriptionManager;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -15,6 +17,8 @@ import java.util.UUID;
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
+
+    private final Logger logger = LoggerFactory.getLogger(DoctrinCoreApplicationImpl.class);
 
     /**
      * The manager of all subscriptions.
@@ -31,9 +35,12 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
         String remoteName = messageContext.getRemoteName();
         ActionCode actionCode = message.getActionCode();
 
+        logger.info("Handling {} for remote {} and action {}.", message.getJsonObject(), remoteName, actionCode);
+
         Subscriber subscriber = subscriptionManager.getSubscriber(remoteName);
 
         if (subscriber == null) {
+            logger.info("No suitable subscriber found for remote name {}.", remoteName);
             subscriber = subscriptionManager.createSubscriber(messageContext, remoteName);
         }
 
@@ -63,6 +70,12 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
         }
     }
 
+    @Override
+    public void handleInactiveSubscriber(String subscriberName) {
+        logger.info("Subscriber {} was marked as inactive. Removing subscriptions.", subscriberName);
+        subscriptionManager.removeSubscriptions(subscriptionManager.getSubscriber(subscriberName));
+    }
+
     /**
      * Handle that the given subscriber wants to publish something.
      *
@@ -71,6 +84,8 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
      * @param selfNotification If the subscriber should also get the message of he subscribed the channel.
      */
     private void handleMessagePublish(Subscriber subscriber, DoctrinMessage message, boolean selfNotification) {
+        logger.info("Handling publish {} from {} with self notification {}.", message.getJsonObject(), subscriber.getName(), selfNotification);
+
         String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
         Subscriber[] subscriptions = subscriptionManager.getSubscriptions(channelName);
 
@@ -94,6 +109,9 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
      */
     private void handleMessageUnsubscribe(Subscriber subscriber, DoctrinMessage message) {
         String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
+
+        logger.info("Handling that {} unsubscribes from channel {} via message {}.", subscriber.getName(), channelName, message.getJsonObject());
+
         subscriptionManager.removeSubscription(channelName, subscriber);
     }
 
@@ -105,6 +123,9 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
      */
     private void handleMessageSubscribe(Subscriber subscriber, DoctrinMessage message) {
         String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
+
+        logger.info("Handling that {} subscribes on channel {} via message {}.", subscriber.getName(), channelName, message.getJsonObject());
+
         subscriptionManager.addSubscription(channelName, subscriber);
     }
 
@@ -118,6 +139,9 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
     private void handleMessageUpdateSubscriberName(Subscriber subscriber, DoctrinMessageContext messageContext, DoctrinMessage message) {
         JSONObject jsonObject = message.getJsonObject();
         String name = jsonObject.optString("name", UUID.randomUUID().toString());
+
+        logger.info("Handling that {} updates his name to {} via message {}.", subscriber.getName(), name, message.getJsonObject());
+
         subscriptionManager.updateSubscriberName(subscriber, name);
         messageContext.setRemoteName(name);
     }

@@ -21,4 +21,11 @@ public interface Subscriber {
      * @param messageContext The message context.
      */
     void setLastMessageContext(DoctrinMessageContext messageContext);
+
+    /**
+     * Get the name of the subscriber.
+     *
+     * @return The name of the subscriber.
+     */
+    String getName();
 }

@@ -11,6 +11,8 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -37,6 +39,8 @@ import java.util.UUID;
  */
 public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JSONObject> implements DoctrinServerConnection {
 
+    private final Logger logger = LoggerFactory.getLogger(DoctrinNettyServerConnection.class);
+
     /**
      * The publish subject that will manage the sequence of incoming messages (Remember: Only the incoming messages
      * will be emitted into this subject, the outgoing will just pass through without this subject noticing at least
@@ -62,6 +66,8 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, JSONObject msg) {
+        logger.debug("Handling incoming raw message {} for {}.", msg, remoteNameSubject.blockingFirst());
+
         DoctrinMessageContext doctrinMessageContext = new DoctrinNettyMessageContext(ctx, this);
         DoctrinMessage doctrinMessage = new DoctrinMessage(msg);
 
@@ -86,6 +92,8 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
 
     @Override
     public void sendMessage(JSONObject jsonObject) {
+        logger.debug("Sending message {} to client {}.", jsonObject, remoteNameSubject.blockingFirst());
+
         channel.writeAndFlush(jsonObject);
     }
 
@@ -96,6 +104,8 @@ public class DoctrinNettyServerConnection extends SimpleChannelInboundHandler<JS
 
     @Override
     public void setRemoteName(String remoteName) {
+        logger.debug("Setting remote name from {} to {}.", remoteNameSubject.blockingFirst(), remoteName);
+
         remoteNameSubject.onNext(remoteName);
     }
 }

@@ -31,7 +31,6 @@ public class DoctrinClientChannelInitializer extends ChannelInitializer<Channel>
         channelPipeline.addLast(new JsonDecoder());
         channelPipeline.addLast(new LengthFieldPrepender(4));
         channelPipeline.addLast(new JsonEncoder());
-        //channelPipeline.addLast(new LoggingHandler(LogLevel.DEBUG));
 
         DoctrinClientConnectionImpl clientConnection = new DoctrinClientConnectionImpl(ch);
         channelPipeline.addLast(clientConnection);

@@ -16,6 +16,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Queue;
@@ -26,13 +28,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetworkClientImpl implements NetworkClient {
 
+    private final Logger logger = LoggerFactory.getLogger(NetworkClientImpl.class);
     private final Queue<JSONObject> sendingQueue = Queues.newConcurrentLinkedQueue();
     private final EventLoopGroup workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
     private final String host;
     private final int port;
     private final DoctrinClientChannelInitializer channelInitializer;
     private Channel channel;
-    private PublishSubject<JSONObject> messages = PublishSubject.create();
+    private final PublishSubject<JSONObject> messages = PublishSubject.create();
+    private final PublishSubject<Boolean> reconnects = PublishSubject.create();
     private DoctrinClientConnection clientConnection;
 
     public NetworkClientImpl(String host, int port) {
@@ -63,13 +67,19 @@ public class NetworkClientImpl implements NetworkClient {
             connect().retryWhen(throwableObservable -> throwableObservable
                     .flatMap(throwable -> {
                                 if (throwable instanceof IOException) {
-                                    System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                    reconnects.onNext(true);
+
+                                    logger.error("Connecting failed: {} - Retrying...", throwable.getMessage());
                                     return Observable.timer(1, TimeUnit.SECONDS);
                                 }
 
                                 return Observable.error(throwable);
                             }
-                    )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!"));
+                    ))
+                    .subscribe(aBoolean1 -> {
+                        logger.info("Reconnected successfully.");
+                        reconnects.onNext(true);
+                    });
         });
     }
 
@@ -77,6 +87,8 @@ public class NetworkClientImpl implements NetworkClient {
     public Observable<Boolean> connect() {
         return Observable.create(observableEmitter -> {
             try {
+                logger.info("Connecting to {}:{}.", host, port);
+
                 Bootstrap bootstrap = new Bootstrap()
                         .group(workerGroup)
                         .handler(channelInitializer)
@@ -85,6 +97,8 @@ public class NetworkClientImpl implements NetworkClient {
 
                 channel = bootstrap.connect(host, port)
                         .sync().channel();
+
+                logger.info("Connected to {}:{} successfully.", host, port);
 
                 observableEmitter.onNext(true);
                 observableEmitter.onComplete();
@@ -100,11 +114,18 @@ public class NetworkClientImpl implements NetworkClient {
     }
 
     @Override
+    public void disconnect() {
+        workerGroup.shutdownGracefully();
+        messages.onComplete();
+        reconnects.onComplete();
+    }
+
+    @Override
     public void sendMessage(JSONObject jsonObject) {
         Preconditions.checkNotNull(jsonObject, "Message may not be null.");
 
         if (!isConnected()) {
-            System.out.println("It seems like there is no connection to the server. Storing message " + jsonObject + " in sending queue.");
+            logger.info("It seems like there is no connection to the server. Storing message {} in sending queue.", jsonObject);
 
             sendingQueue.offer(jsonObject);
             return;
@@ -114,8 +135,8 @@ public class NetworkClientImpl implements NetworkClient {
     }
 
     @Override
-    public void disconnect() {
-        workerGroup.shutdownGracefully();
+    public Observable<Boolean> getReconnect() {
+        return reconnects;
     }
 
     @Override
@@ -127,7 +148,7 @@ public class NetworkClientImpl implements NetworkClient {
      * Process all elements that are left in the sending queue.
      */
     private void processSendingQueue() {
-        System.out.println("Working on Sending Queue...");
+        logger.info("Working on Sending Queue... Sending queue contains {} items.", sendingQueue.size());
 
         while (!sendingQueue.isEmpty()) {
             JSONObject jsonObject = sendingQueue.poll();

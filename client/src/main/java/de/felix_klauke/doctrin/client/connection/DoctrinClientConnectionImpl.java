@@ -6,11 +6,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSONObject> implements DoctrinClientConnection {
+
+    private final Logger logger = LoggerFactory.getLogger(DoctrinClientConnectionImpl.class);
 
     /**
      * The publish subject that will emit all the messages.
@@ -40,6 +44,7 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
 
     @Override
     public void sendMessage(JSONObject jsonObject) {
+        logger.debug("Sending object to server: {}.", jsonObject);
         lastChannel.writeAndFlush(jsonObject);
     }
 
@@ -56,12 +61,12 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
         connectedSubject.onError(cause);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, JSONObject msg) {
+        logger.debug("Received raw message: {}.", msg);
         lastChannel = ctx.channel();
         publishSubject.onNext(msg);
     }

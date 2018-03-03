@@ -21,4 +21,11 @@ public interface DoctrinCoreApplication {
      * @param message        The message.
      */
     void handleMessage(DoctrinMessageContext messageContext, DoctrinMessage message);
+
+    /**
+     * Handle that the subscriber with the given name became inactive by disconnect or programatically.
+     *
+     * @param subscriberName The name of the subscriber.
+     */
+    void handleInactiveSubscriber(String subscriberName);
 }

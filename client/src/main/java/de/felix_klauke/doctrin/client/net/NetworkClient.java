@@ -38,4 +38,11 @@ public interface NetworkClient {
      * @param jsonObject The json object.
      */
     void sendMessage(JSONObject jsonObject);
+
+    /**
+     * Get the reconnect attempts of the client.
+     *
+     * @return The observable of the results of the attempts.
+     */
+    Observable<Boolean> getReconnect();
 }
