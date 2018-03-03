@@ -52,8 +52,13 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
                 handleMessageUnsubscribe(subscriber, message);
                 break;
             }
+            case PUBLISH_OTHER: {
+                handleMessagePublish(subscriber, message, true);
+                break;
+            }
             case PUBLISH: {
-                handleMessagePublish(subscriber, message);
+                handleMessagePublish(subscriber, message, false);
+                break;
             }
         }
     }
@@ -63,12 +68,17 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
      *
      * @param subscriber The subscriber.
      * @param message    The message.
+     * @param selfNotification If the subscriber should also get the message of he subscribed the channel.
      */
-    private void handleMessagePublish(Subscriber subscriber, DoctrinMessage message) {
+    private void handleMessagePublish(Subscriber subscriber, DoctrinMessage message, boolean selfNotification) {
         String channelName = String.valueOf(message.getJsonObject().remove("targetChannel"));
         Subscriber[] subscriptions = subscriptionManager.getSubscriptions(channelName);
 
-        Arrays.stream(subscriptions).filter(subscription -> subscriber != subscription).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
+        message.getJsonObject().put("targetChannel", channelName);
+
+        Arrays.stream(subscriptions)
+                .filter(subscription -> selfNotification && !subscription.equals(subscriber))
+                .forEach(subscription -> subscription.sendObject(message.getJsonObject()));
     }
 
     /**

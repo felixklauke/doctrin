@@ -25,7 +25,7 @@ public class DoctrinServerChannelInitializerTest {
 
     @Before
     public void setUp() {
-        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class))));
+        doctrinServerChannelInitializer = new DoctrinServerChannelInitializer(DoctrinNettyServerConnection::new, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class)), null));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class DoctrinServerChannelInitializerTest {
             public void setRemoteName(String remoteName) {
 
             }
-        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class))));
+        }, new DoctrinServerApplicationImpl(new DoctrinCoreApplicationImpl(Mockito.mock(SubscriptionManager.class)), null));
 
         NioServerSocketChannel channel = new NioServerSocketChannel();
         doctrinServerChannelInitializer.initChannel(channel);

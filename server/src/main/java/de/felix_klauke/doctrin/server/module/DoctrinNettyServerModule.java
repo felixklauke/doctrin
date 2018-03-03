@@ -13,6 +13,9 @@ import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnectionFactory;
 import de.felix_klauke.doctrin.server.network.DoctrinNettyServer;
 import de.felix_klauke.doctrin.server.network.DoctrinServer;
+import de.felix_klauke.doctrin.server.provider.ServerBootstrapProvider;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
@@ -36,8 +39,11 @@ public class DoctrinNettyServerModule extends AbstractModule {
     @Override
     protected void configure() {
         // ChannelInitializer
-        bind(new TypeLiteral<ChannelInitializer<ServerChannel>>() {
+        bind(new TypeLiteral<ChannelInitializer<Channel>>() {
         }).to(DoctrinServerChannelInitializer.class).asEagerSingleton();
+
+        // Bootstrap
+        bind(ServerBootstrap.class).toProvider(ServerBootstrapProvider.class);
 
         // Connection
         install(new FactoryModuleBuilder()

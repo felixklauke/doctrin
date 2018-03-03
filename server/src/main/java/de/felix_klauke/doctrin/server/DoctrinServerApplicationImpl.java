@@ -2,6 +2,7 @@ package de.felix_klauke.doctrin.server;
 
 import de.felix_klauke.doctrin.core.DoctrinCoreApplication;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
+import de.felix_klauke.doctrin.server.network.DoctrinServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +41,22 @@ public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
      */
     private final DoctrinCoreApplication coreApplication;
 
+    /**
+     * The server for network connectivity.
+     */
+    private final DoctrinServer doctrinServer;
+
     @Inject
-    public DoctrinServerApplicationImpl(DoctrinCoreApplication coreApplication) {
+    public DoctrinServerApplicationImpl(DoctrinCoreApplication coreApplication, DoctrinServer doctrinServer) {
         this.coreApplication = coreApplication;
+        this.doctrinServer = doctrinServer;
     }
 
     @Override
     public void initialize() {
         logger.info("Initializing doctrin server application.");
+
+        doctrinServer.start();
 
         logger.info("Initialized doctrin server application.");
     }
@@ -56,8 +65,6 @@ public class DoctrinServerApplicationImpl implements DoctrinServerApplication {
     public void handleNewConnection(DoctrinServerConnection connection) {
         logger.info("New Connection was established.");
 
-        connection.getMessages().subscribe(doctrinMessageWrapper -> {
-            coreApplication.handleMessage(doctrinMessageWrapper.getMessageContext(), doctrinMessageWrapper.getMessage());
-        });
+        connection.getMessages().subscribe(doctrinMessageWrapper -> coreApplication.handleMessage(doctrinMessageWrapper.getMessageContext(), doctrinMessageWrapper.getMessage()));
     }
 }

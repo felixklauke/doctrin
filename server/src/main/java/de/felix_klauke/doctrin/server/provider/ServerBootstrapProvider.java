@@ -1,6 +1,7 @@
 package de.felix_klauke.doctrin.server.provider;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ServerChannel;
@@ -15,18 +16,20 @@ import javax.inject.Provider;
  */
 public class ServerBootstrapProvider implements Provider<ServerBootstrap> {
 
-    private final ServerBootstrap serverBootstrap;
+    private final Class<? extends ServerChannel> serverChannelClazz;
+    private final ChannelInitializer<Channel> channelInitializer;
 
     @Inject
-    public ServerBootstrapProvider(Class<? extends ServerChannel> serverChannelClazz, ChannelInitializer<ServerChannel> channelInitializer) {
-        this.serverBootstrap = new ServerBootstrap()
-                .childOption(ChannelOption.TCP_NODELAY, true)
-                .childHandler(channelInitializer)
-                .channel(serverChannelClazz);
+    public ServerBootstrapProvider(Class<? extends ServerChannel> serverChannelClazz, ChannelInitializer<Channel> channelInitializer) {
+        this.serverChannelClazz = serverChannelClazz;
+        this.channelInitializer = channelInitializer;
     }
 
     @Override
     public ServerBootstrap get() {
-        return serverBootstrap;
+        return new ServerBootstrap()
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childHandler(channelInitializer)
+                .channel(serverChannelClazz);
     }
 }

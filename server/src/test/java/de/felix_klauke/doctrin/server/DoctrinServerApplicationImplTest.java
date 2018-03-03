@@ -5,6 +5,7 @@ import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessageWrapper;
 import de.felix_klauke.doctrin.core.DoctrinCoreApplication;
 import de.felix_klauke.doctrin.server.connection.DoctrinServerConnection;
+import de.felix_klauke.doctrin.server.network.DoctrinServer;
 import io.reactivex.subjects.BehaviorSubject;
 import org.junit.After;
 import org.junit.Before;
@@ -31,12 +32,14 @@ public class DoctrinServerApplicationImplTest {
     DoctrinMessage doctrinMessage;
     @Mock
     DoctrinMessageContext doctrinMessageContext;
+    @Mock
+    DoctrinServer doctrinServer;
 
     private DoctrinServerApplicationImpl doctrinServerApplication;
 
     @Before
     public void setUp() {
-        doctrinServerApplication = new DoctrinServerApplicationImpl(doctrinCoreApplication);
+        doctrinServerApplication = new DoctrinServerApplicationImpl(doctrinCoreApplication, doctrinServer);
     }
 
     @After
@@ -63,5 +66,7 @@ public class DoctrinServerApplicationImplTest {
     @Test
     public void initialize() {
         doctrinServerApplication.initialize();
+
+        Mockito.verify(doctrinServer).start();
     }
 }
