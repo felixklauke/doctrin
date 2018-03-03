@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.client.net;
 
+import com.google.common.collect.Queues;
 import de.felix_klauke.doctrin.client.channel.DoctrinClientChannelInitializer;
 import de.felix_klauke.doctrin.client.connection.DoctrinClientConnection;
 import io.netty.bootstrap.Bootstrap;
@@ -14,11 +15,16 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+
 /**
  * @author Felix Klauke <fklauke@itemis.de>
  */
 public class NetworkClientImpl implements NetworkClient {
 
+    private final Queue<JSONObject> sendingQueue = Queues.newConcurrentLinkedQueue();
     private final EventLoopGroup workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
     private final String host;
     private final int port;
@@ -44,22 +50,49 @@ public class NetworkClientImpl implements NetworkClient {
     private void handleClientConnection(DoctrinClientConnection doctrinClientConnection) {
         messages = doctrinClientConnection.getMessages();
         clientConnection = doctrinClientConnection;
+
+        clientConnection.getConnected().filter(aBoolean -> !aBoolean).subscribe(aBoolean -> connect().retryWhen(throwableObservable -> throwableObservable
+                .flatMap(throwable -> {
+                            if (throwable instanceof IOException) {
+                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                return Observable.timer(1, TimeUnit.SECONDS);
+                            }
+
+                            return Observable.error(throwable);
+                        }
+                )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!")));
     }
 
     @Override
-    public void connect() {
-        try {
-            Bootstrap bootstrap = new Bootstrap()
-                    .group(workerGroup)
-                    .handler(channelInitializer)
-                    .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true);
+    public Observable<Boolean> connect() {
 
-            channel = bootstrap.connect(host, port)
-                    .sync().channel();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        return Observable.create(observableEmitter -> {
+            try {
+                Bootstrap bootstrap = new Bootstrap()
+                        .group(workerGroup)
+                        .handler(channelInitializer)
+                        .channel(Epoll.isAvailable() ? EpollSocketChannel.class : NioSocketChannel.class)
+                        .option(ChannelOption.TCP_NODELAY, true);
+
+                channel = bootstrap.connect(host, port)
+                        .sync().channel();
+
+                observableEmitter.onNext(true);
+                observableEmitter.onComplete();
+            } catch (InterruptedException e) {
+                observableEmitter.onError(e);
+            }
+        });
+    }
+
+    @Override
+    public void sendMessage(JSONObject jsonObject) {
+        if (isConnected()) {
+            sendingQueue.offer(jsonObject);
+            return;
         }
+
+        clientConnection.sendMessage(jsonObject);
     }
 
     @Override
@@ -77,8 +110,14 @@ public class NetworkClientImpl implements NetworkClient {
         return messages;
     }
 
-    @Override
-    public void sendMessage(JSONObject jsonObject) {
-        clientConnection.sendMessage(jsonObject);
+    /**
+     * Process all elements that are left in the sending queue.
+     */
+    private void processSendingQueue() {
+        while (isConnected() && sendingQueue.isEmpty()) {
+            JSONObject jsonObject = sendingQueue.poll();
+
+            sendMessage(jsonObject);
+        }
     }
 }

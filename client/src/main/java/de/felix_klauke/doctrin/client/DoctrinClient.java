@@ -11,7 +11,7 @@ public interface DoctrinClient {
     /**
      * Connect to the server.
      */
-    void connect();
+    Observable<Boolean> connect();
 
     /**
      * Disconnect from the server.

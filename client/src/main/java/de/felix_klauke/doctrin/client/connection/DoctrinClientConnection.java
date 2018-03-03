@@ -16,6 +16,13 @@ public interface DoctrinClientConnection {
     Observable<JSONObject> getMessages();
 
     /**
+     * Get the observable of the connection state.
+     *
+     * @return The connection state.
+     */
+    Observable<Boolean> getConnected();
+
+    /**
      * Send the given message to the server.
      *
      * @param jsonObject The json object.
