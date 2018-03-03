@@ -6,7 +6,7 @@ import de.felix_klauke.doctrin.client.net.NetworkClient;
 import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
@@ -32,9 +32,9 @@ public class DoctrinClientImpl implements DoctrinClient {
     /**
      * The subscription of the messages that come from the client.
      */
-    private Disposable messageSubscription;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public DoctrinClientImpl(NetworkClient networkClient) {
+    DoctrinClientImpl(NetworkClient networkClient) {
         this.networkClient = networkClient;
     }
 
@@ -51,10 +51,8 @@ public class DoctrinClientImpl implements DoctrinClient {
                         }
                 ));
 
-        connectObservable.doOnNext(aBoolean -> {
-            Observable<JSONObject> messages = networkClient.getMessages();
-            messageSubscription = messages.subscribe(this::handleMessage);
-        });
+        Observable<JSONObject> messages = networkClient.getMessages();
+        compositeDisposable.add(messages.subscribe(this::handleMessage));
 
         return connectObservable;
     }
@@ -62,7 +60,7 @@ public class DoctrinClientImpl implements DoctrinClient {
     @Override
     public void disconnect() {
         networkClient.disconnect();
-        messageSubscription.dispose();
+        compositeDisposable.dispose();
     }
 
     @Override

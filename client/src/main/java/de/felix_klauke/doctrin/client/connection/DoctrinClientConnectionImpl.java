@@ -51,7 +51,6 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        System.out.println("INACTIVE!");
         connectedSubject.onNext(false);
     }
 

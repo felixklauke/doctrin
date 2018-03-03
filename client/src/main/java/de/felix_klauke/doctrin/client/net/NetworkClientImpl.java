@@ -1,5 +1,6 @@
 package de.felix_klauke.doctrin.client.net;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Queues;
 import de.felix_klauke.doctrin.client.channel.DoctrinClientChannelInitializer;
 import de.felix_klauke.doctrin.client.connection.DoctrinClientConnection;
@@ -13,11 +14,12 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Felix Klauke <fklauke@itemis.de>
@@ -30,7 +32,7 @@ public class NetworkClientImpl implements NetworkClient {
     private final int port;
     private final DoctrinClientChannelInitializer channelInitializer;
     private Channel channel;
-    private Observable<JSONObject> messages;
+    private PublishSubject<JSONObject> messages = PublishSubject.create();
     private DoctrinClientConnection clientConnection;
 
     public NetworkClientImpl(String host, int port) {
@@ -48,24 +50,31 @@ public class NetworkClientImpl implements NetworkClient {
      * @param doctrinClientConnection The connection.
      */
     private void handleClientConnection(DoctrinClientConnection doctrinClientConnection) {
-        messages = doctrinClientConnection.getMessages();
         clientConnection = doctrinClientConnection;
 
-        clientConnection.getConnected().filter(aBoolean -> !aBoolean).subscribe(aBoolean -> connect().retryWhen(throwableObservable -> throwableObservable
-                .flatMap(throwable -> {
-                            if (throwable instanceof IOException) {
-                                System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
-                                return Observable.timer(1, TimeUnit.SECONDS);
-                            }
+        clientConnection.getMessages().subscribe(messages);
 
-                            return Observable.error(throwable);
-                        }
-                )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!")));
+        clientConnection.getConnected().subscribe(aBoolean -> {
+            if (aBoolean) {
+                processSendingQueue();
+                return;
+            }
+
+            connect().retryWhen(throwableObservable -> throwableObservable
+                    .flatMap(throwable -> {
+                                if (throwable instanceof IOException) {
+                                    System.out.println("Connecting failed: " + throwable.getMessage() + " Retrying...");
+                                    return Observable.timer(1, TimeUnit.SECONDS);
+                                }
+
+                                return Observable.error(throwable);
+                            }
+                    )).subscribe(aBoolean1 -> System.out.println("Successfully reconnected!"));
+        });
     }
 
     @Override
     public Observable<Boolean> connect() {
-
         return Observable.create(observableEmitter -> {
             try {
                 Bootstrap bootstrap = new Bootstrap()
@@ -86,18 +95,22 @@ public class NetworkClientImpl implements NetworkClient {
     }
 
     @Override
+    public boolean isConnected() {
+        return !workerGroup.isShutdown() && channel != null && channel.isActive();
+    }
+
+    @Override
     public void sendMessage(JSONObject jsonObject) {
-        if (isConnected()) {
+        Preconditions.checkNotNull(jsonObject, "Message may not be null.");
+
+        if (!isConnected()) {
+            System.out.println("It seems like there is no connection to the server. Storing message " + jsonObject + " in sending queue.");
+
             sendingQueue.offer(jsonObject);
             return;
         }
 
         clientConnection.sendMessage(jsonObject);
-    }
-
-    @Override
-    public boolean isConnected() {
-        return !workerGroup.isShutdown() && channel.isActive();
     }
 
     @Override
@@ -114,7 +127,9 @@ public class NetworkClientImpl implements NetworkClient {
      * Process all elements that are left in the sending queue.
      */
     private void processSendingQueue() {
-        while (isConnected() && sendingQueue.isEmpty()) {
+        System.out.println("Working on Sending Queue...");
+
+        while (!sendingQueue.isEmpty()) {
             JSONObject jsonObject = sendingQueue.poll();
 
             sendMessage(jsonObject);
