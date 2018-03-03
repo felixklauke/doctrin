@@ -30,7 +30,6 @@ public class DoctrinClientConnectionImpl extends SimpleChannelInboundHandler<JSO
 
     @Override
     public void sendMessage(JSONObject jsonObject) {
-
         lastChannel.writeAndFlush(jsonObject);
     }
 

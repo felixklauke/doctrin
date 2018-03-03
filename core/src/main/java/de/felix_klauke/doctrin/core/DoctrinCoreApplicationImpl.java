@@ -53,11 +53,11 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
                 break;
             }
             case PUBLISH_OTHER: {
-                handleMessagePublish(subscriber, message, true);
+                handleMessagePublish(subscriber, message, false);
                 break;
             }
             case PUBLISH: {
-                handleMessagePublish(subscriber, message, false);
+                handleMessagePublish(subscriber, message, true);
                 break;
             }
         }
@@ -76,8 +76,13 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
 
         message.getJsonObject().put("targetChannel", channelName);
 
+        if (selfNotification) {
+            Arrays.stream(subscriptions).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
+            return;
+        }
+
         Arrays.stream(subscriptions)
-                .filter(subscription -> selfNotification && !subscription.equals(subscriber))
+                .filter(subscriber1 -> !subscriber1.equals(subscriber))
                 .forEach(subscription -> subscription.sendObject(message.getJsonObject()));
     }
 
