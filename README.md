@@ -5,7 +5,7 @@
 
 Ever searched for a reliable and full featured java pub sub library that is still lightweight, easy to use and
 configurable for anyone? Then you will kinda like doctrin. It provides a very basic api but can be extended very
-easy to use more complex and powerful libraries like rx java. It integrates easily in every infrastructure.
+easy to use more complex and powerful rx java. It integrates easily in every infrastructure.
 
 # Usage
 
@@ -24,15 +24,6 @@ Client:
 <dependency>
     <groupId>de.felix-klauke</groupId>
     <artifactId>doctrin-client</artifactId>
-    <version>1.0.0-RELEASE</version>
-</dependency>
-```
-
-RxClient:
-```xml
-<dependency>
-    <groupId>de.felix-klauke</groupId>
-    <artifactId>doctrin-client-rx</artifactId>
     <version>1.0.0-RELEASE</version>
 </dependency>
 ```
