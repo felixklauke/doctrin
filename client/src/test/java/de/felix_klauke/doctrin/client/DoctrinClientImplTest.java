@@ -1,6 +1,7 @@
 package de.felix_klauke.doctrin.client;
 
 import de.felix_klauke.doctrin.client.exception.NoSuchSubscriptionException;
+import de.felix_klauke.doctrin.client.net.NetworkClientImpl;
 import io.reactivex.Observable;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -21,7 +22,7 @@ public class DoctrinClientImplTest {
 
     @Before
     public void setUp() {
-        doctrinClient = new DoctrinClientImpl("localhost", 8085);
+        doctrinClient = new DoctrinClientImpl(new NetworkClientImpl("localhost", 8085));
     }
 
     @Test
