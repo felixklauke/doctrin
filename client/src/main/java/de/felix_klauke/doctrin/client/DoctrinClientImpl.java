@@ -3,7 +3,6 @@ package de.felix_klauke.doctrin.client;
 import com.google.common.collect.Maps;
 import de.felix_klauke.doctrin.client.exception.NoSuchSubscriptionException;
 import de.felix_klauke.doctrin.client.net.NetworkClient;
-import de.felix_klauke.doctrin.client.net.NetworkClientImpl;
 import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
@@ -31,30 +30,24 @@ public class DoctrinClientImpl implements DoctrinClient {
     /**
      * The subscription of the messages that come from the client.
      */
-    private final Disposable messageSubscription;
+    private Disposable messageSubscription;
 
-    public DoctrinClientImpl(String host, int port) {
-        networkClient = new NetworkClientImpl(host, port);
+    public DoctrinClientImpl(NetworkClient networkClient) {
+        this.networkClient = networkClient;
+    }
+
+    @Override
+    public void connect() {
         networkClient.connect();
 
         Observable<JSONObject> messages = networkClient.getMessages();
         messageSubscription = messages.subscribe(this::handleMessage);
     }
 
-    private void handleMessage(JSONObject jsonObject) {
-        String channel = (String) jsonObject.remove("targetChannel");
-
-        if (channel == null) {
-            throw new MissingTargetChannelException("The message " + jsonObject + " misses target channel field.");
-        }
-
-        PublishSubject<JSONObject> subject = subscriptions.get(channel);
-
-        if (subject == null) {
-            return;
-        }
-
-        subject.onNext(jsonObject);
+    @Override
+    public void disconnect() {
+        networkClient.disconnect();
+        messageSubscription.dispose();
     }
 
     @Override
@@ -68,11 +61,21 @@ public class DoctrinClientImpl implements DoctrinClient {
         PublishSubject<JSONObject> subject = PublishSubject.create();
         subscriptions.put(channelName, subject);
 
-        networkClient.sendMessage(new JSONObject().put("actionCode", ActionCode.SUBSCRIBE.ordinal()).put("targetChannel", channelName));
+        networkClient.sendMessage(new JSONObject()
+                .put("actionCode", ActionCode.SUBSCRIBE.ordinal())
+                .put("targetChannel", channelName));
 
         subject.doOnComplete(() -> subscriptions.remove(channelName));
 
         return subject;
+    }
+
+    @Override
+    public void publishOther(String channel, JSONObject jsonObject) {
+        jsonObject.put("targetChannel", channel);
+        jsonObject.put("actionCode", ActionCode.PUBLISH_OTHER.ordinal());
+
+        networkClient.sendMessage(jsonObject);
     }
 
     @Override
@@ -92,5 +95,26 @@ public class DoctrinClientImpl implements DoctrinClient {
         jsonObject.put("actionCode", ActionCode.PUBLISH.ordinal());
 
         networkClient.sendMessage(jsonObject);
+    }
+
+    /**
+     * Handle the given incoming message.
+     *
+     * @param jsonObject The json object.
+     */
+    private void handleMessage(JSONObject jsonObject) {
+        String channel = (String) jsonObject.remove("targetChannel");
+
+        if (channel == null) {
+            throw new MissingTargetChannelException("The message " + jsonObject + " misses target channel field.");
+        }
+
+        PublishSubject<JSONObject> subject = subscriptions.get(channel);
+
+        if (subject == null) {
+            return;
+        }
+
+        subject.onNext(jsonObject);
     }
 }

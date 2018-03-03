@@ -9,6 +9,16 @@ import org.json.JSONObject;
 public interface DoctrinClient {
 
     /**
+     * Connect to the server.
+     */
+    void connect();
+
+    /**
+     * Disconnect from the server.
+     */
+    void disconnect();
+
+    /**
      * Subscribe to channel with the given name.
      *
      * @param channelName The channel name.
@@ -26,8 +36,20 @@ public interface DoctrinClient {
     /**
      * Publish the given json object to the given channel.
      *
+     * If you subscribed to the given channel you will also receive the message.
+     *
      * @param channel    The channel.
-     * @param jsonObject the json object.
+     * @param jsonObject The json object.
      */
     void publish(String channel, JSONObject jsonObject);
+
+    /**
+     * Publish the given json object to the given channel.
+     * <p>
+     * This client won't receive the message even if you have subscribed the given channel.
+     *
+     * @param channel    The channel.
+     * @param jsonObject The json object.
+     */
+    void publishOther(String channel, JSONObject jsonObject);
 }

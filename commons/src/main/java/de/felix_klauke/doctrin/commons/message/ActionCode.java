@@ -5,5 +5,5 @@ package de.felix_klauke.doctrin.commons.message;
  */
 public enum ActionCode {
 
-    UPDATE_SUBSCRIBER_NAME, SUBSCRIBE, UNSUBSCRIBE, PUBLISH, UNKNOWN
+    UPDATE_SUBSCRIBER_NAME, SUBSCRIBE, UNSUBSCRIBE, PUBLISH, UNKNOWN, PUBLISH_OTHER
 }
