@@ -67,7 +67,7 @@ public class NetworkClientImpl implements NetworkClient {
             connect().retryWhen(throwableObservable -> throwableObservable
                     .flatMap(throwable -> {
                                 if (throwable instanceof IOException) {
-                                    reconnects.onNext(true);
+                                    reconnects.onNext(false);
 
                                     logger.error("Connecting failed: {} - Retrying...", throwable.getMessage());
                                     return Observable.timer(1, TimeUnit.SECONDS);
