@@ -8,6 +8,7 @@ import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.PublishSubject;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,26 @@ public class DoctrinClientImpl implements DoctrinClient {
                         }
                 ));
 
-        // TODO: Bulk subscribe
-        networkClient.getReconnect().filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
-                .subscribe(reconnectAttemptSuccessful -> subscriptions.keySet().forEach(this::sendSubscribeMessage));
+        resendSubscriptions();
 
         Observable<JSONObject> messages = networkClient.getMessages();
         compositeDisposable.add(messages.subscribe(this::handleMessage));
         return connectObservable;
+    }
+
+    /**
+     * Subscribes to all channels currently subscribed in one bulk subscription.
+     */
+    private void resendSubscriptions() {
+        networkClient.getReconnect().filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
+                .subscribe(reconnectAttemptSuccessful -> {
+
+                    JSONArray jsonArray = new JSONArray(subscriptions.keySet());
+                    JSONObject jsonObject = new JSONObject()
+                            .put("actionCode", ActionCode.BULK_SUBSCRIBE.ordinal())
+                            .put("targetChannels", jsonArray);
+                    networkClient.sendMessage(jsonObject);
+                });
     }
 
     @Override

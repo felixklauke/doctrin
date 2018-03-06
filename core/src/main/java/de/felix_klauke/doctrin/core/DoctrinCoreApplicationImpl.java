@@ -5,12 +5,14 @@ import de.felix_klauke.doctrin.commons.message.DoctrinMessage;
 import de.felix_klauke.doctrin.commons.message.DoctrinMessageContext;
 import de.felix_klauke.doctrin.core.subscription.Subscriber;
 import de.felix_klauke.doctrin.core.subscription.SubscriptionManager;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -55,6 +57,10 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
                 handleMessageSubscribe(subscriber, message);
                 break;
             }
+            case BULK_SUBSCRIBE: {
+                handleMessageBulkSubscribe(subscriber, message);
+                break;
+            }
             case UNSUBSCRIBE: {
                 handleMessageUnsubscribe(subscriber, message);
                 break;
@@ -67,6 +73,26 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
                 handleMessagePublish(subscriber, message, true);
                 break;
             }
+        }
+    }
+
+    /**
+     * Handle that a client wants to subscribe to multiple channels at once.
+     *
+     * @param subscriber The subscriber.
+     * @param message    The message.
+     */
+    private void handleMessageBulkSubscribe(Subscriber subscriber, DoctrinMessage message) {
+        JSONObject jsonObject = message.getJsonObject();
+        JSONArray targetChannels = jsonObject.getJSONArray("targetChannels");
+        List<Object> objects = targetChannels.toList();
+
+        for (Object channelNameObject : objects) {
+            if (!(channelNameObject instanceof String)) {
+                continue;
+            }
+
+            subscriptionManager.addSubscription(channelNameObject.toString(), subscriber);
         }
     }
 
