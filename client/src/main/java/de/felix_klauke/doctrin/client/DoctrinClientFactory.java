@@ -11,6 +11,10 @@ public class DoctrinClientFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DoctrinClientFactory.class);
 
+    DoctrinClientFactory() {
+        throw new AssertionError("You should not init factories.");
+    }
+
     public static DoctrinClient createClient(String host, int port) {
         LOGGER.info("Creating new client against {}:{}.", host, port);
 
