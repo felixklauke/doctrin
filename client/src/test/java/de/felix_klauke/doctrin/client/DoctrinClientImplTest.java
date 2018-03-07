@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.concurrent.CountDownLatch;
@@ -26,9 +27,12 @@ public class DoctrinClientImplTest {
 
     @Mock
     NetworkClient networkClient;
+    @Mock
+    Observable<Boolean> reconnect;
 
     @Before
     public void setUp() {
+        Mockito.when(networkClient.getReconnect()).thenReturn(reconnect);
         doctrinClient = new DoctrinClientImpl(networkClient);
     }
 
