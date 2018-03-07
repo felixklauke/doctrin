@@ -117,6 +117,8 @@ public class DoctrinCoreApplicationImpl implements DoctrinCoreApplication {
 
         message.getJsonObject().put("targetChannel", channelName);
 
+        System.out.println(Arrays.toString(subscriptions));
+
         if (selfNotification) {
             Arrays.stream(subscriptions).forEach(subscription -> subscription.sendObject(message.getJsonObject()));
             return;
