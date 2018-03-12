@@ -13,7 +13,7 @@ _Maven Repository:_
 ```xml
 <repository>
     <id>felix-klauke-releases</id>
-    <url>https://repo.felix-klauke.de/repository/maven-releases/</url>
+    <url>https://nexus01.felix-klauke.de/repository/maven-releases/</url>
 </repository>
 ```
 
