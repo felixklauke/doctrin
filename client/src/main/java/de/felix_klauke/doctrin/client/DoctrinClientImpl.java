@@ -7,6 +7,7 @@ import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -62,7 +63,7 @@ public class DoctrinClientImpl implements DoctrinClient {
                     logger.error("Error while connecting to the server. The error was not IO based and will be delegated to the user: " + throwable.getMessage());
                             return Observable.error(throwable);
                         }
-                ));
+                )).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
 
         Observable<JSONObject> messages = networkClient.getMessages();
         compositeDisposable.add(messages.subscribe(this::handleMessage));

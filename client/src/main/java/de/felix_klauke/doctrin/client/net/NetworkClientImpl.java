@@ -131,7 +131,25 @@ public class NetworkClientImpl implements NetworkClient {
             return;
         }
 
-        clientConnection.sendMessage(jsonObject);
+        final int[] currentTries = {0};
+        final int maxRetries = 10;
+        Observable<Boolean> messageObservable = clientConnection.sendMessage(jsonObject);
+        messageObservable
+                .retryWhen(throwableObservable -> throwableObservable
+                        .flatMap(throwable -> {
+                                    if (throwable instanceof IOException && currentTries[0]++ < maxRetries) {
+                                        logger.error("Sending message {} failed: {} - Retrying...", jsonObject, throwable.getMessage());
+                                        return Observable.timer(1, TimeUnit.SECONDS);
+                                    }
+
+                                    return Observable.error(throwable);
+                                }
+                        ))
+                .subscribe(aBoolean1 -> logger.info("Message {} sent successfully.", jsonObject),
+                        throwable -> {
+                            throwable.printStackTrace();
+                            logger.warn("After trying to send {} {} times it was finally lost.", jsonObject, currentTries);
+                        });
     }
 
     @Override
