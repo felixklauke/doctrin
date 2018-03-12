@@ -45,6 +45,8 @@ public class DoctrinClientImpl implements DoctrinClient {
 
     DoctrinClientImpl(NetworkClient networkClient) {
         this.networkClient = networkClient;
+
+        resendSubscriptions();
     }
 
     @Override
@@ -63,8 +65,6 @@ public class DoctrinClientImpl implements DoctrinClient {
                         }
                 )).observeOn(Schedulers.io()).subscribeOn(Schedulers.io());
 
-        resendSubscriptions();
-
         Observable<JSONObject> messages = networkClient.getMessages();
         compositeDisposable.add(messages.subscribe(this::handleMessage));
         return connectObservable;
@@ -74,9 +74,9 @@ public class DoctrinClientImpl implements DoctrinClient {
      * Subscribes to all channels currently subscribed in one bulk subscription.
      */
     private void resendSubscriptions() {
-        networkClient.getReconnect().filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
+        networkClient.getReconnect()
+                .filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
                 .subscribe(reconnectAttemptSuccessful -> {
-
                     JSONArray jsonArray = new JSONArray(subscriptions.keySet());
                     JSONObject jsonObject = new JSONObject()
                             .put("actionCode", ActionCode.BULK_SUBSCRIBE.ordinal())
