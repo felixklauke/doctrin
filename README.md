@@ -47,10 +47,29 @@ Commons (If you wan to use our utils, warning: May change at any time without wa
 ```
 
 # Example
-```java
+### Creating a client config
 
+_Read from properties file:_
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.fromProperties("client.properties");
+```
+
+_Read from json file:_
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.fromJson("client-config.json");
+```
+
+_Create by given values:_
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.from(...);
+```
+
+### Creating a client
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.from(...);
+DoctrinClient doctrinClient = DoctrinClientFactory.createDoctrinClient();
 ```
 
 # Architecture
 We use Google Guice for internal dependency injection. The logging is managed via logback and the networking is powered
-by netty.
+by netty. Tests are written using JUnit4 alongside with Mockito and PowerMockito. We heavily rely on RxJava.
