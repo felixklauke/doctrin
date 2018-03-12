@@ -27,5 +27,5 @@ public interface DoctrinClientConnection {
      *
      * @param jsonObject The json object.
      */
-    void sendMessage(JSONObject jsonObject);
+    Observable<Boolean> sendMessage(JSONObject jsonObject);
 }
