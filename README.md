@@ -47,12 +47,19 @@ Commons (If you wan to use our utils, warning: May change at any time without wa
 ```
 
 # Example
+
+## Client
+
 ### Creating a client config
 
 _Read from properties file:_
 ```java
 DoctrinClientConfig clientConfig = DoctrinClientConfig.fromProperties("client.properties");
-```
+``
+
+_Read from json file:_
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.fromJson("client-config.json");
 
 _Read from json file:_
 ```java
@@ -69,6 +76,40 @@ DoctrinClientConfig clientConfig = DoctrinClientConfig.from(...);
 DoctrinClientConfig clientConfig = DoctrinClientConfig.from(...);
 DoctrinClient doctrinClient = DoctrinClientFactory.createDoctrinClient();
 ```
+
+### Subscribing to a channel (Java 7)
+```java
+Observable<JSONObject> testChannelObservable = doctrinClient.observeChannel("test-channel");
+    testChannelObservable.subscribe(new Consumer<JSONObject>() {
+        @Override
+        public void accept(JSONObject jsonObject) throws Exception {
+
+        }
+    });
+```
+
+### Subscribing to a channel
+_Java 7:_
+```java
+Observable<JSONObject> testChannelObservable = doctrinClient.subscribeChannel("test-channel");
+    testChannelObservable.subscribe(new Consumer<JSONObject>() {
+        @Override
+        public void accept(JSONObject jsonObject) throws Exception {
+
+        }
+    });
+```
+
+_Java 8 Lambda:_
+```java
+Observable<JSONObject> testChannelObservable = doctrinClient.subscribeChannel("test-channel");
+testChannelObservable.subscribe(jsonObject -> {
+
+});
+```
+
+## Server
+
 
 # Architecture
 We use Google Guice for internal dependency injection. The logging is managed via logback and the networking is powered
