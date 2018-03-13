@@ -13,7 +13,7 @@ _Maven Repository:_
 ```xml
 <repository>
     <id>felix-klauke-releases</id>
-    <url>https://repo.felix-klauke.de/repository/maven-releases/</url>
+    <url>https://nexus01.felix-klauke.de/repository/maven-releases/</url>
 </repository>
 ```
 
@@ -55,7 +55,11 @@ Commons (If you wan to use our utils, warning: May change at any time without wa
 _Read from properties file:_
 ```java
 DoctrinClientConfig clientConfig = DoctrinClientConfig.fromProperties("client.properties");
-```
+``
+
+_Read from json file:_
+```java
+DoctrinClientConfig clientConfig = DoctrinClientConfig.fromJson("client-config.json");
 
 _Read from json file:_
 ```java
