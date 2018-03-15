@@ -114,9 +114,7 @@ public class DoctrinClientImpl implements DoctrinClient {
 
         sendSubscribeMessage(channelName);
 
-        subject.doOnComplete(() -> subscriptions.remove(channelName));
-
-        return subject;
+        return subject.doOnComplete(() -> subscriptions.remove(channelName));
     }
 
     @Override
