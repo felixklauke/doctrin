@@ -7,6 +7,7 @@ import de.felix_klauke.doctrin.commons.exception.MissingTargetChannelException;
 import de.felix_klauke.doctrin.commons.message.ActionCode;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import org.json.JSONArray;
@@ -74,7 +75,7 @@ public class DoctrinClientImpl implements DoctrinClient {
      * Subscribes to all channels currently subscribed in one bulk subscription.
      */
     private void resendSubscriptions() {
-        networkClient.getReconnect()
+        Disposable subscription = networkClient.getReconnect()
                 .filter(reconnectAttemptSuccessful -> reconnectAttemptSuccessful)
                 .subscribe(reconnectAttemptSuccessful -> {
                     JSONArray jsonArray = new JSONArray(subscriptions.keySet());
@@ -83,6 +84,8 @@ public class DoctrinClientImpl implements DoctrinClient {
                             .put("targetChannels", jsonArray);
                     networkClient.sendMessage(jsonObject);
                 });
+
+        compositeDisposable.add(subscription);
     }
 
     @Override
