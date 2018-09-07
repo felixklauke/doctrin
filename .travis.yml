@@ -1,8 +1,29 @@
+######################################
+### Configure programming language ###
+######################################
 language: java
-script: "mvn clean compile test cobertura:cobertura"
 
+##################################
+### Make sure using Oracle JDK ###
+##################################
 jdk:
-  - oraclejdk8
+- oraclejdk8
 
+###################################
+### Disable Email notifications ###
+###################################
+notifications:
+  email: false
+
+###########################
+### Actual Build Script ###
+###########################
+script:
+- ./gradlew build check
+- ./gradlew codeCoverageReport
+
+###################################
+### Upload Code Coverage Report ###
+###################################
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)
