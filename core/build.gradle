@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'de.d3adspace.doctrin'
+version '2.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    /**
+     * Google Guice for dependency injection.
+     */
+    compile group: 'com.google.inject', name: 'guice', version: '4.2.0'
+}
