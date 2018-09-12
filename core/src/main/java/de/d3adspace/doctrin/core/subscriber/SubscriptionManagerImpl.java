@@ -3,6 +3,7 @@ package de.d3adspace.doctrin.core.subscriber;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     /**
      * All currently known and active subscriptions.
      */
-    private final Map<String, List<Subscriber>> subscriptions = Maps.newConcurrentMap();
+    private final Map<String, List<Subscriber>> subscriptions;
+
+    SubscriptionManagerImpl(Map<String, List<Subscriber>> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    @Inject
+    public SubscriptionManagerImpl() {
+        this(Maps.newConcurrentMap());
+    }
 
     @Override
     public void subscribeChannel(Subscriber subscriber, String channelName) {
@@ -28,6 +38,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     public void unsubscribeChannel(Subscriber subscriber, String channelName) {
 
         List<Subscriber> subscribers = subscriptions.get(channelName);
+
         if (subscribers == null) {
             return;
         }
@@ -44,6 +55,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     public List<Subscriber> getSubscribers(String channelName) {
 
         List<Subscriber> subscribers = subscriptions.get(channelName);
+
+        if (subscribers == null) {
+            subscribers = Lists.newArrayList();
+        }
+
         return Collections.unmodifiableList(subscribers);
     }
 
