@@ -5,10 +5,10 @@ package de.d3adspace.doctrin.commons.message;
  */
 public interface DoctrinMessageContext {
 
-    /**
-     * Resume the execution flow with the given message.
-     *
-     * @param message The message.
-     */
-    void resume(DoctrinMessage message);
+  /**
+   * Resume the execution flow with the given message.
+   *
+   * @param message The message.
+   */
+  void resume(DoctrinMessage message);
 }

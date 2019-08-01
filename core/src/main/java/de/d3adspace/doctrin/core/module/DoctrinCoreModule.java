@@ -11,10 +11,10 @@ import de.d3adspace.doctrin.core.subscriber.SubscriptionManagerImpl;
  */
 public class DoctrinCoreModule extends AbstractModule {
 
-    @Override
-    protected void configure() {
+  @Override
+  protected void configure() {
 
-        bind(DoctrinCore.class).to(DoctrinCoreImpl.class);
-        bind(SubscriptionManager.class).to(SubscriptionManagerImpl.class);
-    }
+    bind(DoctrinCore.class).to(DoctrinCoreImpl.class);
+    bind(SubscriptionManager.class).to(SubscriptionManagerImpl.class);
+  }
 }

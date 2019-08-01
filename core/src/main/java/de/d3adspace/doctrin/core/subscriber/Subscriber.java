@@ -5,5 +5,5 @@ package de.d3adspace.doctrin.core.subscriber;
  */
 public interface Subscriber {
 
-    
+
 }
