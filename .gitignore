@@ -1,6 +1,16 @@
-# Created by .ignore support plugin (hsz.mobi)
-.idea
+#####################
+### Project files ###
+#####################
 *.iml
-out
-gen
+.idea
 target
+out
+
+##############
+### Gradle ###
+##############
+.gradle
+build
+
+# Never ignore gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
