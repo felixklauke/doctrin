@@ -40,7 +40,7 @@ allprojects {
         /**
          * Vintage platform engine.
          */
-        testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: '1.6.2'
+        testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: '1.7.0'
 
         /**
          * JUnit jupiter with mockito.
