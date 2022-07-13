@@ -45,7 +45,7 @@ allprojects {
         /**
          * JUnit jupiter with mockito.
          */
-        testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.11.2'
+        testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.6.1'
 
         /**
          * Mockito for mocking.
